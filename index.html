@@ -44,6 +44,16 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
     
+    html, body {
+      height: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+
     body {
       font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
@@ -140,12 +150,31 @@
     }
 
     #view-test:not(.hidden) {
-      height: 100vh !important;
-      max-height: 100vh !important;
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
       min-height: 0 !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
+      z-index: 40 !important;
+      background-color: #ffffff !important;
+    }
+
+    #view-test header {
+      flex-shrink: 0 !important;
+      z-index: 50 !important;
+    }
+
+    #view-test footer {
+      flex-shrink: 0 !important;
+      z-index: 50 !important;
+      position: relative !important;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08) !important;
+      background-color: #ffffff !important;
     }
 
     /* DESKTOP (Split Screen - Authentic College Board Bluebook Layout) */
@@ -171,17 +200,18 @@
       }
     }
 
-    /* MOBILE PHONES & TABLETS (Seamless Unified Vertical Scroll) */
+    /* MOBILE PHONES & TABLETS (Seamless Unified Vertical Scroll Inside Main) */
     @media (max-width: 767px) {
       #view-test main {
         flex: 1 1 0% !important;
         min-height: 0 !important;
-        height: auto !important;
+        height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 2.5rem;
+        overscroll-behavior: contain;
+        padding-bottom: 2rem !important;
       }
       #view-test section {
         height: auto !important;
@@ -201,10 +231,17 @@
         flex: none !important;
         width: 100% !important;
         background-color: transparent !important;
-        padding: 0 1rem 2rem 1rem !important;
+        padding: 0 1rem 1.5rem 1rem !important;
       }
       #right-panel-wrapper {
         max-width: 100% !important;
+      }
+      #view-test footer {
+        height: 56px !important;
+        min-height: 56px !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        padding-bottom: max(4px, env(safe-area-inset-bottom, 0px)) !important;
       }
       #desmos-floating-container {
         inset: 0 !important;
@@ -515,7 +552,7 @@
     </main>
 
     <!-- BLUEBOOK BOTTOM NAVIGATION BAR -->
-    <footer class="bg-white border-t border-gray-200 h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between shrink-0 shadow-sm">
+    <footer class="bg-white border-t border-gray-200 h-14 sm:h-16 px-2 sm:px-6 flex items-center justify-between shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
       <!-- Left: Test info -->
       <div class="hidden sm:block text-xs font-semibold text-gray-500">
         <span id="footer-test-title">Digital SAT Practice</span>
@@ -523,20 +560,22 @@
 
       <!-- Center: Review Grid Modal Trigger -->
       <div class="flex items-center">
-        <button onclick="toggleModal('modal-review-grid')" class="text-xs font-bold text-gray-800 hover:text-blue-700 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg border border-gray-300 flex items-center space-x-1.5 sm:space-x-2 transition shadow-sm">
-          <i class="fa-solid fa-table-cells text-gray-600"></i>
-          <span id="footer-question-status">Question 1 of 22</span>
-          <i class="fa-solid fa-chevron-up text-[10px] ml-1"></i>
+        <button onclick="toggleModal('modal-review-grid')" class="text-xs font-bold text-gray-800 hover:text-blue-700 bg-gray-100 hover:bg-gray-200 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-300 flex items-center space-x-1 sm:space-x-2 transition shadow-sm">
+          <i class="fa-solid fa-table-cells text-gray-600 text-xs"></i>
+          <span id="footer-question-status" class="text-xs font-bold">Question 1 of 22</span>
+          <i class="fa-solid fa-chevron-up text-[9px] sm:text-[10px] ml-0.5"></i>
         </button>
       </div>
 
       <!-- Right: Back and Next buttons -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
-        <button id="btn-nav-back" onclick="navigateQuestion(-1)" class="px-3.5 sm:px-5 py-2 text-xs font-bold rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
-          Back
+      <div class="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+        <button id="btn-nav-back" onclick="navigateQuestion(-1)" class="px-2.5 sm:px-5 py-1.5 sm:py-2 text-xs font-bold rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i>
+          <span>Back</span>
         </button>
-        <button id="btn-nav-next" onclick="navigateQuestion(1)" class="px-4.5 sm:px-6 py-2 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow">
-          Next
+        <button id="btn-nav-next" onclick="navigateQuestion(1)" class="px-3.5 sm:px-6 py-1.5 sm:py-2 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow flex items-center space-x-1">
+          <span>Next</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
         </button>
       </div>
     </footer>
@@ -1567,6 +1606,13 @@
 
       // Back / Next button state
       document.getElementById('btn-nav-back').disabled = (currentQuestionIndex === 0);
+      const isLastQ = (currentQuestionIndex === currentModuleQuestions.length - 1);
+      const nextBtn = document.getElementById('btn-nav-next');
+      if (nextBtn) {
+        nextBtn.innerHTML = isLastQ 
+          ? '<span>Review</span><i class="fa-solid fa-list-check text-[10px] ml-1"></i>'
+          : '<span>Next</span><i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>';
+      }
 
       // Flag for review button
       const isFlagged = !!flaggedQuestions[q.id];
