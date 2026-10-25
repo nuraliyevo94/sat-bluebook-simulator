@@ -371,6 +371,9 @@
 
     <!-- Main Container -->
     <main class="max-w-6xl mx-auto w-full px-4 py-8 flex-1">
+      <!-- ACTIVE IN-PROGRESS TEST RESUME BANNER -->
+      <div id="active-session-banner-container" class="mb-6"></div>
+
       <!-- HERO: DYNAMIC ON-THE-FLY ADAPTIVE TEST GENERATOR -->
       <div class="bg-gradient-to-r from-[#002d62] via-[#00387a] to-[#0a4282] text-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8 border border-blue-900/40 relative overflow-hidden">
         <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -1168,7 +1171,148 @@
     }
 
 
+
+    // ================= ACTIVE SESSION PERSISTENCE & AUTO-SAVE =================
+    function autoSaveActiveSession() {
+      if (!currentTest || isTestFinished) return;
+      try {
+        const sessionData = {
+          test: currentTest,
+          moduleIndex: currentModuleIndex,
+          questionIndex: currentQuestionIndex,
+          answers: userAnswers,
+          flagged: flaggedQuestions,
+          timerSeconds: timerSeconds,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('sat_active_session', JSON.stringify(sessionData));
+      } catch (err) {
+        console.warn('Failed to auto-save active session:', err);
+      }
+    }
+
+    function checkActiveSessionBanner() {
+      const bannerContainer = document.getElementById('active-session-banner-container');
+      if (!bannerContainer) return;
+      bannerContainer.innerHTML = '';
+
+      const raw = localStorage.getItem('sat_active_session');
+      if (!raw) return;
+
+      try {
+        const session = JSON.parse(raw);
+        if (!session || !session.test) return;
+
+        const answeredCount = Object.keys(session.answers || {}).length;
+        const totalModQs = (session.moduleIndex === 1) 
+          ? (session.test.module1 ? session.test.module1.length : 22)
+          : 22;
+
+        bannerContainer.innerHTML = `
+          <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white rounded-2xl p-5 shadow-lg border border-amber-300/40 relative overflow-hidden animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div class="flex items-center space-x-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                  <i class="fa-solid fa-clock-rotate-left text-amber-100"></i>
+                </div>
+                <div>
+                  <div class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-100 text-[10px] font-bold uppercase tracking-wider mb-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Tugallanmagan test saqlangan</span>
+                  </div>
+                  <h4 class="font-extrabold text-base text-white leading-tight">
+                    ${session.test.title || "Digital SAT Test"}
+                  </h4>
+                  <p class="text-xs text-amber-100 mt-0.5">
+                    Module ${session.moduleIndex} &bull; ${session.questionIndex + 1}-savolda to'xtatilgan &bull; <strong>${answeredCount} ta</strong> savolga javob belgilangan
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2 shrink-0 self-end sm:self-center">
+                <button onclick="resumeActiveSession()" class="px-5 py-2.5 bg-white hover:bg-amber-50 active:scale-95 text-amber-900 font-extrabold text-xs rounded-xl transition shadow flex items-center space-x-2 cursor-pointer">
+                  <i class="fa-solid fa-play text-amber-600"></i>
+                  <span>Shu joyidan davom ettirish</span>
+                </button>
+                <button onclick="scoreAndFinishActiveSession()" class="px-4 py-2.5 bg-amber-900/40 hover:bg-amber-900/60 active:scale-95 text-white font-bold text-xs rounded-xl transition border border-white/20 cursor-pointer" title="Hozirgi holatda natijani hisoblash">
+                  <span>Tugatish</span>
+                </button>
+                <button onclick="discardActiveSession()" class="p-2.5 bg-black/20 hover:bg-rose-600/80 active:scale-95 text-white text-xs rounded-xl transition cursor-pointer" title="O'chirib tashlash">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function resumeActiveSession() {
+      const raw = localStorage.getItem('sat_active_session');
+      if (!raw) return;
+      try {
+        const session = JSON.parse(raw);
+        currentTest = session.test;
+        currentModuleIndex = session.moduleIndex || 1;
+        currentModuleQuestions = (currentModuleIndex === 1) 
+          ? currentTest.module1 
+          : (currentTest.adaptivePath === 'Hard' ? currentTest.module2_hard : currentTest.module2_easy);
+        currentQuestionIndex = session.questionIndex || 0;
+        userAnswers = session.answers || {};
+        flaggedQuestions = session.flagged || {};
+        timerSeconds = session.timerSeconds || 2100;
+        isTestFinished = false;
+
+        document.getElementById('footer-test-title').innerText = currentTest.title;
+        switchView('view-test');
+        startTimer();
+        renderQuestion();
+        showToast("Testingiz qoldirilgan joyidan davom ettirildi!");
+      } catch (e) {
+        console.error("Resume failed:", e);
+      }
+    }
+
+    function scoreAndFinishActiveSession() {
+      const raw = localStorage.getItem('sat_active_session');
+      if (!raw) return;
+      try {
+        const session = JSON.parse(raw);
+        currentTest = session.test;
+        currentModuleIndex = session.moduleIndex || 1;
+        userAnswers = session.answers || {};
+        flaggedQuestions = session.flagged || {};
+        isTestFinished = false;
+        localStorage.removeItem('sat_active_session');
+        scoreAndShowResults();
+      } catch (e) {
+        console.error("Finish active session failed:", e);
+      }
+    }
+
+    function discardActiveSession() {
+      showCustomConfirm({
+        title: "Tugallanmagan testni o'chirish",
+        message: "Haqiqatan ham saqlanib qolgan testni o'chirib tashlamoqchimisiz? Undagi barcha javoblaringiz bekor qilinadi.",
+        confirmText: "O'chirish",
+        onConfirm: () => {
+          localStorage.removeItem('sat_active_session');
+          checkActiveSessionBanner();
+          showToast("Tugallanmagan test o'chirildi");
+        }
+      });
+    }
+
+    // Auto-save on page exit/refresh
+    window.addEventListener('beforeunload', () => {
+      if (currentTest && !isTestFinished) {
+        autoSaveActiveSession();
+      }
+    });
+
     function initDashboard() {
+      checkActiveSessionBanner();
       const container = document.getElementById('test-history-container');
       if (!container) return;
       container.innerHTML = '';
@@ -1779,6 +1923,7 @@
       } else {
         userAnswers[qid] = label;
       }
+      autoSaveActiveSession();
       renderQuestion();
     }
 
@@ -1787,6 +1932,7 @@
       if (q) {
         if (val.trim()) {
           userAnswers[q.id] = val.trim();
+          autoSaveActiveSession();
         } else {
           delete userAnswers[q.id];
         }
@@ -1811,6 +1957,7 @@
       const newIndex = currentQuestionIndex + step;
       if (newIndex >= 0 && newIndex < currentModuleQuestions.length) {
         currentQuestionIndex = newIndex;
+        autoSaveActiveSession();
         renderQuestion();
       } else if (newIndex >= currentModuleQuestions.length) {
         // Reached end of 22 questions -> Go to module review screen
@@ -2005,6 +2152,8 @@
     }
 
     function scoreAndShowResults() {
+      isTestFinished = true;
+      localStorage.removeItem('sat_active_session');
       let m1Correct = 0;
       let m2Correct = 0;
       const m1Questions = currentTest.module1;
