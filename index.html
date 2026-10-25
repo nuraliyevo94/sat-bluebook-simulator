@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital SAT Bluebook Simulator - Official Question Bank</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+
+  <!-- Tailwind CSS: Local offline first, CDN fallback -->
+  <script src="vendor/tailwind.js"></script>
+  <script>window.tailwind || document.write('<script src="https://cdn.tailwindcss.com"><\/script>')</script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cb: {
+              navy: '#002d62',
+              blue: '#0073e6',
+              light: '#f3f4f6',
+              border: '#d1d5db',
+              dark: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for math rendering: Local offline first, CDN fallback -->
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/auto-render.min.js"></script>
+
+  <!-- Font Awesome Icons: Local offline first, CDN fallback -->
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+
+  <!-- Official Question Bank & 20 Practice Tests -->
+  <script src="official_question_bank.js"></script>
+  <script src="bluebook_db.js"></script>
+  <script src="uzbek_rationales.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    body {
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Official MathML & College Board Content Styling */
+    math {
+      font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', 'Times New Roman', serif;
+      font-size: 1.05em;
+    }
+    figure.table, .table-container {
+      margin: 1em 0;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0.5em 0;
+      min-width: 140px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 14px;
+      text-align: center;
+      font-size: 0.95em;
+    }
+    th {
+      background-color: #f8fafc;
+      font-weight: 600;
+    }
+
+    /* Option selection styling */
+    .option-btn {
+      transition: all 0.15s ease-in-out;
+    }
+    .option-btn:hover {
+      background-color: #f8fafc;
+      border-color: #94a3b8;
+    }
+    .option-btn.selected {
+      background-color: #f0f7ff;
+      border-color: #0073e6;
+    }
+    .option-btn.selected .radio-circle {
+      border-color: #0073e6;
+      background-color: #0073e6;
+      color: white;
+    }
+
+    /* Strikethrough for eliminated option */
+    .option-btn.eliminated {
+      opacity: 0.45;
+      text-decoration: line-through;
+      background-color: #f1f5f9;
+    }
+
+    /* Absolute View Visibility Isolation (Zero screen overlapping) */
+    .hidden,
+    #view-dashboard.hidden,
+    #view-test.hidden,
+    #view-module-review.hidden,
+    #view-break.hidden,
+    #view-results.hidden {
+      display: none !important;
+    }
+
+    #view-break:not(.hidden) {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 50 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      min-height: 100vh !important;
+      background-color: #0f172a !important;
+    }
+
+    #view-module-review:not(.hidden) {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 100vh !important;
+      overflow-y: auto !important;
+    }
+
+    #view-test:not(.hidden) {
+      max-height: 100vh !important;
+      min-height: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+    #view-test main {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+    #view-test section {
+      min-height: 0 !important;
+      height: 100% !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    #right-panel-section {
+      overflow-y: auto !important;
+      scrollbar-gutter: stable;
+    }
+
+    /* Option image/graph constraints (compact, inline, crisp) */
+    .option-btn svg, .option-btn img {
+      max-height: 52px !important;
+      width: auto !important;
+      max-width: 100% !important;
+      object-fit: contain;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      pointer-events: none;
+    }
+    .option-btn figure {
+      margin: 0 !important;
+      display: flex;
+      justify-content: center;
+    }
+    #question-prompt img {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0.25rem 0 1rem 0;
+      image-rendering: -webkit-optimize-contrast;
+      border-radius: 6px;
+    }
+    #question-prompt svg {
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0.5rem auto;
+    }
+
+    /* Floating Draggable Calculator */
+    #desmos-floating-container {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      resize: both;
+      overflow: hidden;
+      min-width: 380px;
+      min-height: 400px;
+      max-width: 95vw;
+      max-height: 85vh;
+    }
+
+    .katex-display { margin: 0.75em 0 !important; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 h-screen flex flex-col overflow-hidden">
+
+  <!-- ========================================== -->
+  <!-- 1. HOME SCREEN / TESTS DASHBOARD           -->
+  <!-- ========================================== -->
+  <div id="view-dashboard" class="flex-1 flex flex-col overflow-y-auto bg-slate-50">
+    <!-- Dashboard Top Bar -->
+    <header class="bg-[#002d62] text-white px-6 py-4 shadow flex items-center justify-between shrink-0">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded bg-white/10 flex items-center justify-center font-bold text-lg border border-white/20">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-wide">Digital SAT Bluebook Simulator</h1>
+          <p class="text-xs text-sky-200">Official College Board Question Bank &bull; Dynamic Adaptive Tests</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3 text-sm">
+        <div class="bg-white/10 px-3 py-1.5 rounded border border-white/10 text-xs">
+          <i class="fa-solid fa-calculator text-amber-300 mr-1.5"></i>Official SAT Desmos
+        </div>
+        <div class="bg-white/10 px-3 py-1.5 rounded border border-white/10 text-xs text-sky-200">
+          <i class="fa-solid fa-user-pen text-sky-300 mr-1.5"></i>Muallif: <strong class="text-white font-bold ml-1">Otabek_N</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto w-full px-4 py-8 flex-1">
+      <!-- HERO: DYNAMIC ON-THE-FLY ADAPTIVE TEST GENERATOR -->
+      <div class="bg-gradient-to-r from-[#002d62] via-[#00387a] to-[#0a4282] text-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8 border border-blue-900/40 relative overflow-hidden">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center space-x-2 bg-blue-500/20 text-sky-200 px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-sky-400/20">
+              <i class="fa-solid fa-bolt text-amber-300"></i>
+              <span>On-The-Fly Automatic Selection &bull; Shuffled Choices</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Full-Length Digital SAT Math Test</h2>
+            <p class="text-sm text-sky-100 mt-2 leading-relaxed">
+              Enters a freshly generated 44-question adaptive test drawn directly from the <strong>1,153 official College Board question database</strong> across all 4 SAT Math domains.
+              <strong>Answer choices (A, B, C, D) are randomly permuted</strong> every session to eliminate position bias. 
+              Module 1 performance adaptively routes you to Hard or Easy Module 2 with real College Board scoring.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 mt-4 text-xs text-sky-200 font-medium">
+              <span><i class="fa-solid fa-layer-group mr-1.5 text-amber-300"></i> 2 Modules (22 + 22)</span>
+              <span><i class="fa-regular fa-clock mr-1.5 text-amber-300"></i> 70 Mins (35 + 35)</span>
+              <span><i class="fa-solid fa-shuffle mr-1.5 text-emerald-300"></i> Shuffled Choices (A/B/C/D)</span>
+              <span><i class="fa-solid fa-calculator mr-1.5 text-amber-300"></i> Official Desmos</span>
+            </div>
+          </div>
+          <div class="shrink-0 flex items-center">
+            <button onclick="startDynamicAdaptiveTest()" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-base rounded-xl transition shadow-lg flex items-center justify-center space-x-2.5">
+              <i class="fa-solid fa-play"></i>
+              <span>Start New Adaptive Test</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Targeted Domain Drills Bar -->
+        <div class="mt-6 pt-5 border-t border-white/10">
+          <div class="text-xs font-bold text-sky-200 uppercase tracking-wider mb-2.5 flex items-center gap-2">
+            <i class="fa-solid fa-crosshairs text-amber-300"></i> Targeted Domain Drills (22 Questions Each &bull; Shuffled Choices)
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <button onclick="startDomainDrill('Algebra')" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-lg text-xs font-bold transition border border-white/10 text-left flex items-center justify-between">
+              <span>Algebra (184 Qs)</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-sky-300"></i>
+            </button>
+            <button onclick="startDomainDrill('Advanced Math')" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-lg text-xs font-bold transition border border-white/10 text-left flex items-center justify-between">
+              <span>Advanced Math (413 Qs)</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-sky-300"></i>
+            </button>
+            <button onclick="startDomainDrill('Problem-Solving')" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-lg text-xs font-bold transition border border-white/10 text-left flex items-center justify-between">
+              <span>Problem-Solving (278 Qs)</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-sky-300"></i>
+            </button>
+            <button onclick="startDomainDrill('Geometry')" class="py-2.5 px-3 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-lg text-xs font-bold transition border border-white/10 text-left flex items-center justify-between">
+              <span>Geometry & Trig (291 Qs)</span>
+              <i class="fa-solid fa-arrow-right text-[10px] text-sky-300"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Performance Stats -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-8">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Your Testing Performance</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-100">
+            <div class="text-xs font-semibold text-slate-500 uppercase">Question Bank</div>
+            <div id="stat-total-qs" class="text-2xl font-bold text-slate-800 mt-1">1,153 Qs</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-100">
+            <div class="text-xs font-semibold text-slate-500 uppercase">Completed Tests</div>
+            <div id="stat-completed" class="text-2xl font-bold text-blue-600 mt-1">0</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-100">
+            <div class="text-xs font-semibold text-slate-500 uppercase">Average Score</div>
+            <div id="stat-avg-score" class="text-2xl font-bold text-emerald-600 mt-1">---</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-100">
+            <div class="text-xs font-semibold text-slate-500 uppercase">Highest Score</div>
+            <div id="stat-max-score" class="text-2xl font-bold text-indigo-600 mt-1">---</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Attempts & Detailed Performance History -->
+      <div class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-sky-600"></i> Ishlangan Testlar Tarixi va Tahlil (Past Attempts)
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">Avvalgi test natijalaringiz, xatolar tahlili va College Board rasmiy yechimlarini qayta ko'rib chiqing.</p>
+        </div>
+        <button onclick="resetAllScores()" class="text-xs text-slate-400 hover:text-rose-600 transition flex items-center gap-1 self-start sm:self-auto py-1 px-2.5 rounded hover:bg-slate-200">
+          <i class="fa-solid fa-trash-can"></i> Tarixni tozalash (Clear History)
+        </button>
+      </div>
+
+      <!-- Test History Cards Container -->
+      <div id="test-history-container" class="space-y-3 pb-6">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Dashboard Footer with Author Attribution -->
+      <footer class="mt-8 pt-6 pb-12 border-t border-slate-200 text-center text-xs text-slate-500">
+        <div class="flex items-center justify-center space-x-2">
+          <span>Digital SAT Bluebook Simulator</span>
+          <span>&bull;</span>
+          <span>Muallif: <strong class="text-slate-800 font-bold">Otabek_N</strong></span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. REAL BLUEBOOK TESTING SCREEN            -->
+  <!-- ========================================== -->
+  <div id="view-test" class="flex-1 flex flex-col hidden bg-white h-full min-h-0 overflow-hidden">
+    <!-- BLUEBOOK TOP HEADER -->
+    <header class="bg-[#002d62] text-white h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0">
+      <!-- Left: Subject & Module info -->
+      <div class="flex items-center space-x-3">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-sky-200 uppercase tracking-wider">Section 2: Math</span>
+          <span id="header-module-label" class="text-sm font-semibold text-white">Module 1</span>
+        </div>
+        <div class="h-6 w-px bg-white/20 mx-1"></div>
+        <!-- Directions Button -->
+        <button onclick="toggleModal('modal-directions')" class="text-xs text-sky-200 hover:text-white flex items-center space-x-1 py-1 px-2 rounded hover:bg-white/10 transition">
+          <span>Directions</span>
+          <i class="fa-solid fa-chevron-down text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- Center: Timer -->
+      <div class="flex items-center space-x-2 bg-black/20 px-3 py-1 rounded-full border border-white/10">
+        <i class="fa-regular fa-clock text-sky-300 text-xs"></i>
+        <span id="test-timer-display" class="font-mono text-sm font-bold tracking-wider">35:00</span>
+        <button id="btn-toggle-timer" onclick="toggleTimerVisibility()" class="text-[11px] text-sky-200 hover:text-white font-medium ml-1 underline cursor-pointer">
+          Hide
+        </button>
+      </div>
+
+      <!-- Right: Calculator & Reference Tools -->
+      <div class="flex items-center space-x-2">
+        <!-- Desmos Calculator Button -->
+        <button onclick="toggleDesmosCalculator()" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-1.5 rounded flex items-center space-x-1.5 border border-white/15 transition shadow-sm">
+          <i class="fa-solid fa-calculator text-amber-300"></i>
+          <span>Calculator</span>
+        </button>
+
+        <!-- Reference Sheet Button -->
+        <button onclick="toggleModal('modal-reference')" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-1.5 rounded flex items-center space-x-1.5 border border-white/15 transition shadow-sm">
+          <i class="fa-solid fa-book-open text-sky-300"></i>
+          <span>Reference</span>
+        </button>
+
+        <!-- Finish Test Early Button -->
+        <button onclick="finishTestEarlyPrompt()" title="Testni yakunlash va natijani hisoblash" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded flex items-center space-x-1.5 transition shadow-sm ml-1">
+          <i class="fa-solid fa-flag-checkered text-amber-300"></i>
+          <span>Finish</span>
+        </button>
+
+        <!-- Exit to Dashboard -->
+        <button onclick="confirmExitTest()" title="Return to Dashboard" class="text-xs text-white/70 hover:text-rose-300 p-1.5 rounded hover:bg-white/10 ml-2 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- BLUEBOOK QUESTION CANVAS (Split layout) -->
+    <main class="flex-1 flex flex-col md:flex-row min-h-0 h-full overflow-hidden">
+      <!-- Left Panel: Question Prompt & Equations -->
+      <section class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto min-h-0 h-full border-b md:border-b-0 md:border-r border-gray-200">
+        <div class="max-w-3xl w-full mx-auto">
+          <!-- Question Number & Mark for Review -->
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-200">
+            <span id="question-header-num" class="text-sm font-bold text-gray-800 tracking-wide">
+              Question 1 of 22
+            </span>
+            <button id="btn-mark-review" onclick="toggleMarkReview()" class="flex items-center space-x-2 text-xs font-semibold px-2.5 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+              <i id="flag-icon" class="fa-regular fa-bookmark"></i>
+              <span>Mark for Review</span>
+            </button>
+          </div>
+
+          <!-- Prompt content (MathML & HTML supported) -->
+          <div id="question-prompt" class="text-base text-gray-900 leading-relaxed space-y-4">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Answer Options or Grid-in -->
+      <section id="right-panel-section" class="w-full md:w-[460px] lg:w-[500px] shrink-0 p-4 md:p-6 overflow-y-auto min-h-0 h-full bg-slate-50/50 flex flex-col justify-start">
+        <div id="right-panel-wrapper" class="max-w-lg w-full mx-auto">
+          <!-- Multiple Choice Container -->
+          <div id="container-mcq" class="space-y-2.5 pb-10">
+            <!-- Options A, B, C, D will be inserted here -->
+          </div>
+
+          <!-- Student-Produced Response (Grid-in) Container -->
+          <div id="container-gridin" class="hidden">
+            <div class="bg-blue-50/70 border border-blue-200 rounded-lg p-4 mb-4 text-xs text-blue-900 leading-relaxed">
+              <div class="font-bold mb-1 flex items-center space-x-1.5">
+                <i class="fa-solid fa-circle-info text-blue-600"></i>
+                <span>Student-Produced Response Guidelines:</span>
+              </div>
+              <p>Enter your answer as a whole number, a decimal (e.g., <strong>3.5</strong>), or a fraction (e.g., <strong>7/2</strong>). Mixed numbers like 3 1/2 are not accepted.</p>
+            </div>
+
+            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              Your Answer:
+            </label>
+            <input type="text" id="gridin-input" oninput="saveCurrentAnswer(this.value)" placeholder="e.g. 3.5 or 7/2"
+              class="w-full px-4 py-3 text-lg font-mono font-semibold text-gray-800 bg-white border-2 border-gray-300 rounded-lg focus:border-blue-600 focus:outline-none transition shadow-sm">
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BLUEBOOK BOTTOM NAVIGATION BAR -->
+    <footer class="bg-white border-t border-gray-200 h-16 px-6 flex items-center justify-between shrink-0 shadow-sm">
+      <!-- Left: Test info -->
+      <div class="text-xs font-semibold text-gray-500">
+        <span id="footer-test-title">Digital SAT Practice</span>
+      </div>
+
+      <!-- Center: Review Grid Modal Trigger -->
+      <div class="flex items-center">
+        <button onclick="toggleModal('modal-review-grid')" class="text-xs font-bold text-gray-800 hover:text-blue-700 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg border border-gray-300 flex items-center space-x-2 transition shadow-sm">
+          <i class="fa-solid fa-table-cells text-gray-600"></i>
+          <span id="footer-question-status">Question 1 of 22</span>
+          <i class="fa-solid fa-chevron-up text-[10px] ml-1"></i>
+        </button>
+      </div>
+
+      <!-- Right: Back and Next buttons -->
+      <div class="flex items-center space-x-3">
+        <button id="btn-nav-back" onclick="navigateQuestion(-1)" class="px-5 py-2 text-xs font-bold rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+          Back
+        </button>
+        <button id="btn-nav-next" onclick="navigateQuestion(1)" class="px-6 py-2 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow">
+          Next
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. MODULE REVIEW / BREAK / SUBMIT SCREENS  -->
+  <!-- ========================================== -->
+  <!-- Module Completion Review Screen -->
+  <div id="view-module-review" class="flex-1 flex flex-col hidden bg-slate-50 overflow-y-auto p-6 md:p-12">
+    <div class="max-w-3xl mx-auto w-full bg-white rounded-xl shadow border border-gray-200 p-8">
+      <div class="text-center pb-6 border-b border-gray-100">
+        <div class="w-14 h-14 bg-blue-100 text-[#002d62] rounded-full flex items-center justify-center mx-auto text-2xl font-bold mb-3">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <h2 id="review-screen-title" class="text-2xl font-bold text-gray-900">Review Module 1</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Review your answers before moving on. You can return to any question in this module.
+        </p>
+      </div>
+
+      <!-- Review Grid in Screen -->
+      <div class="py-6">
+        <h3 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Question Status (22 questions):</h3>
+        <div id="module-review-items-grid" class="grid grid-cols-6 sm:grid-cols-11 gap-2.5">
+          <!-- Dynamically populated -->
+        </div>
+        <div class="flex items-center justify-center space-x-6 text-xs text-gray-600 mt-6 pt-4 border-t border-gray-100">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-4 h-4 rounded bg-gray-900 text-white inline-block"></span>
+            <span>Answered</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="w-4 h-4 rounded border-2 border-dashed border-gray-400 inline-block"></span>
+            <span>Unanswered</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-bookmark text-amber-500"></i>
+            <span>For Review</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+        <button onclick="returnToTestFromReview()" class="px-5 py-2.5 text-xs font-bold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Return to Questions
+        </button>
+        <button id="btn-submit-module" onclick="submitCurrentModule()" class="px-6 py-2.5 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow">
+          Submit Module & Proceed <i class="fa-solid fa-arrow-right ml-1.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10-Minute Break Screen (Simulated) -->
+  <div id="view-break" class="fixed inset-0 z-50 flex flex-col hidden bg-slate-900 text-white items-center justify-center p-6 min-h-screen w-screen">
+    <div class="max-w-md w-full bg-slate-800 border border-slate-700/80 rounded-3xl p-8 text-center shadow-2xl m-auto">
+      <div class="w-16 h-16 rounded-full bg-sky-500/20 text-sky-400 mx-auto flex items-center justify-center text-3xl mb-4 shadow-inner">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <h2 class="text-2xl font-extrabold text-white tracking-tight">10-Minute Break</h2>
+      <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+        You've completed Module 1. In the official Digital SAT, you take an optional 10-minute break before proceeding to Module 2.
+      </p>
+
+      <div class="my-6 bg-slate-900/70 p-5 rounded-2xl border border-slate-700/60 shadow-inner">
+        <div class="text-xs text-sky-300/80 uppercase font-bold tracking-wider">Break Countdown</div>
+        <div id="break-timer" class="text-4xl font-mono font-extrabold text-sky-400 mt-1.5 tracking-wider">10:00</div>
+      </div>
+
+      <button onclick="startModule2()" class="w-full py-3.5 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-extrabold text-sm rounded-xl transition shadow-lg shadow-sky-600/30 flex items-center justify-center space-x-2">
+        <span>Resume Testing (Skip Break)</span>
+        <i class="fa-solid fa-forward-fast ml-1"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. FINAL RESULTS & RATIONALES REPORT       -->
+  <!-- ========================================== -->
+  <div id="view-results" class="flex-1 flex flex-col hidden bg-slate-50 overflow-y-auto p-6 md:p-10">
+    <div class="max-w-5xl mx-auto w-full">
+      <!-- Back button -->
+      <button onclick="showDashboard()" class="mb-4 text-xs font-bold text-gray-600 hover:text-blue-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Return to Dashboard</span>
+      </button>
+
+      <!-- Results Header Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-gray-100">
+          <div>
+            <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Score Report</span>
+            <h2 id="result-test-title" class="text-2xl font-bold text-gray-900 mt-0.5">Digital SAT Math Practice 1</h2>
+            <p id="result-adaptive-path" class="text-xs text-gray-500 mt-1">
+              Path: <strong>Hard Module 2</strong> (Advanced adaptive scoring track)
+            </p>
+          </div>
+
+          <!-- Score Badge -->
+          <div class="flex items-center space-x-4">
+            <div class="text-center px-6 py-3 bg-gradient-to-tr from-[#002d62] to-blue-700 text-white rounded-2xl shadow-md">
+              <div class="text-xs uppercase font-medium tracking-wider text-sky-200">Math Scaled Score</div>
+              <div id="result-scaled-score" class="text-4xl font-extrabold tracking-tight mt-0.5">760</div>
+              <div class="text-[10px] text-sky-300">Scale: 200 to 800</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accuracy breakdown -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+          <div class="bg-emerald-50 border border-emerald-100 p-3.5 rounded-xl">
+            <div class="text-xs font-bold text-emerald-800 uppercase">Correct Answers</div>
+            <div id="result-correct-count" class="text-2xl font-bold text-emerald-600 mt-1">38 / 44</div>
+          </div>
+          <div class="bg-rose-50 border border-rose-100 p-3.5 rounded-xl">
+            <div class="text-xs font-bold text-rose-800 uppercase">Incorrect / Omitted</div>
+            <div id="result-incorrect-count" class="text-2xl font-bold text-rose-600 mt-1">6 / 44</div>
+          </div>
+          <div class="bg-blue-50 border border-blue-100 p-3.5 rounded-xl">
+            <div class="text-xs font-bold text-blue-800 uppercase">Module 1 Score</div>
+            <div id="result-m1-score" class="text-2xl font-bold text-blue-600 mt-1">20 / 22</div>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-100 p-3.5 rounded-xl">
+            <div class="text-xs font-bold text-indigo-800 uppercase">Module 2 Score</div>
+            <div id="result-m2-score" class="text-2xl font-bold text-indigo-600 mt-1">18 / 22</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Performance Breakdown -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center space-x-2">
+          <i class="fa-solid fa-chart-pie text-sky-600"></i>
+          <span>Performance by Domain</span>
+        </h3>
+        <div id="domain-breakdown-bars" class="space-y-4">
+          <!-- Dynamically inserted -->
+        </div>
+      </div>
+
+      <!-- Detailed Question Rationales Review -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-gray-200 gap-3">
+          <div>
+            <h3 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+              <i class="fa-solid fa-list-check text-blue-600"></i>
+              <span>Question-by-Question Review & Rationales</span>
+            </h3>
+            <p class="text-xs text-gray-500 mt-0.5">Click any question to view the full official College Board step-by-step solution.</p>
+          </div>
+          <!-- Filter buttons & Solutions Toggle -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <button onclick="filterResults('all')" id="filter-btn-all" class="px-3 py-1.5 rounded-lg font-bold bg-[#002d62] text-white">All (44)</button>
+            <button onclick="filterResults('incorrect')" id="filter-btn-incorrect" class="px-3 py-1.5 rounded-lg font-bold bg-gray-100 text-gray-700 hover:bg-gray-200">Incorrect Only</button>
+            <button onclick="filterResults('flagged')" id="filter-btn-flagged" class="px-3 py-1.5 rounded-lg font-bold bg-gray-100 text-gray-700 hover:bg-gray-200">Flagged</button>
+            <button onclick="toggleAllSolutions()" id="btn-toggle-all-solutions" class="px-3.5 py-1.5 rounded-lg font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition flex items-center gap-1.5 ml-1">
+              <i class="fa-solid fa-eye"></i> <span>Barcha yechimlarni ochish</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Questions accordion list -->
+        <div id="results-questions-list" class="divide-y divide-gray-100 mt-2">
+          <!-- Dynamically inserted -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODALS (DIRECTIONS, REFERENCE, REVIEW GRID) -->
+  <!-- ========================================== -->
+
+    <!-- In-Page Custom Confirmation Modal (Replaces browser confirm) -->
+  <div id="modal-custom-confirm" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 transform transition-all animate-in fade-in zoom-in duration-150">
+      <div class="flex items-start gap-4">
+        <div id="confirm-modal-icon-bg" class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 text-xl shadow-xs">
+          <i id="confirm-modal-icon" class="fa-solid fa-trash-can"></i>
+        </div>
+        <div class="flex-1">
+          <h3 id="confirm-modal-title" class="text-base font-extrabold text-slate-900 leading-snug">Test natijasini o'chirish</h3>
+          <p id="confirm-modal-message" class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+            Haqiqatan ham ushbu test natijasini tarixdan o'chirmoqchimisiz?
+          </p>
+        </div>
+      </div>
+      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeCustomConfirm()" class="px-4 py-2.5 text-xs font-bold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 active:scale-95 transition">
+          Bekor qilish
+        </button>
+        <button type="button" id="btn-confirm-modal-action" onclick="executeCustomConfirm()" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5">
+          O'chirish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. DIRECTIONS MODAL -->
+  <div id="modal-directions" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-xl w-full p-6 shadow-2xl border border-gray-200">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+        <h3 class="text-base font-bold text-gray-900">Section 2: Math — Directions</h3>
+        <button onclick="toggleModal('modal-directions')" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="py-4 text-xs text-gray-700 space-y-3 leading-relaxed max-h-[70vh] overflow-y-auto">
+        <p><strong>Timing:</strong> 35 minutes are allotted for each module (22 questions per module).</p>
+        <p><strong>Calculator:</strong> An acceptable calculator (including the built-in Desmos graphing calculator) may be used on all questions.</p>
+        <p><strong>Reference Sheet:</strong> A formula reference sheet is provided via the "Reference" button at the top of the screen.</p>
+        <p><strong>Question Formats:</strong> The test includes multiple-choice questions (with 4 answer options) and student-produced response questions.</p>
+        <p><strong>Student-Produced Response Guidelines:</strong></p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>If an answer is a fraction like 7/2 or decimal like 3.5, you may enter either format.</li>
+          <li>Negative symbols must be placed first (e.g., -4).</li>
+          <li>Mixed numbers such as 3 1/2 are not permitted; enter 7/2 or 3.5 instead.</li>
+        </ul>
+      </div>
+      <div class="pt-3 border-t border-gray-200 text-right">
+        <button onclick="toggleModal('modal-directions')" class="px-4 py-2 bg-[#002d62] text-white text-xs font-bold rounded-lg hover:bg-blue-900">
+          Close Directions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. OFFICIAL SAT REFERENCE SHEET MODAL -->
+  <div id="modal-reference" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-4xl w-full p-6 shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+        <h3 class="text-base font-bold text-gray-900">Official SAT Math Reference Sheet</h3>
+        <button onclick="toggleModal('modal-reference')" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="py-4 overflow-y-auto flex-1 space-y-6 text-xs text-gray-800">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div class="p-3 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-1">Circle</div>
+            <div class="text-sm font-serif">$A = \pi r^2$</div>
+            <div class="text-sm font-serif mt-1">$C = 2\pi r$</div>
+          </div>
+          <div class="p-3 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-1">Rectangle</div>
+            <div class="text-sm font-serif">$A = \ell w$</div>
+          </div>
+          <div class="p-3 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-1">Triangle</div>
+            <div class="text-sm font-serif">$A = \frac{1}{2}bh$</div>
+          </div>
+          <div class="p-3 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-1">Pythagorean Theorem</div>
+            <div class="text-sm font-serif">$c^2 = a^2 + b^2$</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-2">Special Right Triangles:</div>
+            <div class="space-y-2 text-sm font-serif">
+              <div>$45^\circ - 45^\circ - 90^\circ$: Side lengths in ratio $x : x : x\sqrt{2}$</div>
+              <div>$30^\circ - 60^\circ - 90^\circ$: Side lengths in ratio $x : x\sqrt{3} : 2x$</div>
+            </div>
+          </div>
+          <div class="p-4 bg-slate-50 border rounded-lg">
+            <div class="font-bold text-gray-700 mb-2">Volume Formulas:</div>
+            <div class="grid grid-cols-2 gap-2 text-sm font-serif">
+              <div>Rectangular Prism: $V = \ell w h$</div>
+              <div>Cylinder: $V = \pi r^2 h$</div>
+              <div>Sphere: $V = \frac{4}{3}\pi r^3$</div>
+              <div>Cone: $V = \frac{1}{3}\pi r^2 h$</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 leading-relaxed">
+          <strong>Important Information:</strong>
+          <ul class="list-disc pl-5 mt-1 space-y-0.5">
+            <li>The number of degrees of arc in a circle is $360^\circ$.</li>
+            <li>The number of radians of arc in a circle is $2\pi$.</li>
+            <li>The sum of the measures in degrees of the angles of a triangle is $180^\circ$.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-3 border-t border-gray-200 text-right">
+        <button onclick="toggleModal('modal-reference')" class="px-4 py-2 bg-[#002d62] text-white text-xs font-bold rounded-lg hover:bg-blue-900">
+          Close Reference
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. REVIEW GRID MODAL (BOTTOM POPUP LIKE BLUEBOOK) -->
+  <div id="modal-review-grid" class="fixed inset-0 bg-black/40 z-50 hidden flex items-end sm:items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-gray-200 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
+        <div>
+          <h3 class="text-base font-bold text-gray-900">Review Questions</h3>
+          <p id="review-grid-module-info" class="text-xs text-gray-500">Section 2: Math — Module 1</p>
+        </div>
+        <button onclick="toggleModal('modal-review-grid')" class="text-gray-400 hover:text-gray-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- 22 question grid -->
+      <div class="py-6 overflow-y-auto flex-1">
+        <div id="popup-review-grid-container" class="grid grid-cols-6 sm:grid-cols-11 gap-2.5">
+          <!-- 1 to 22 buttons inserted dynamically -->
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center justify-center space-x-6 text-xs text-gray-600 mt-6 pt-4 border-t border-gray-100">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-3.5 h-3.5 rounded bg-gray-900 inline-block"></span>
+            <span>Answered</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="w-3.5 h-3.5 rounded border-2 border-dashed border-gray-400 inline-block"></span>
+            <span>Unanswered</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-bookmark text-amber-500 text-xs"></i>
+            <span>For Review</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+        <button onclick="toggleModal('modal-review-grid')" class="px-4 py-2 text-xs font-bold text-gray-600 hover:text-gray-800">
+          Close
+        </button>
+        <button onclick="goToModuleReviewScreen()" class="px-4 py-2 bg-[#002d62] text-white text-xs font-bold rounded-lg hover:bg-blue-900">
+          Go to Module Review
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. FLOATING DESMOS GRAPHING CALCULATOR      -->
+  <!-- ========================================== -->
+  <div id="desmos-floating-container" class="fixed top-14 right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-300 hidden flex flex-col w-[560px] h-[580px] max-w-[95vw] max-h-[85vh]">
+    <!-- Calculator Header (Draggable Handle) -->
+    <div id="desmos-header" class="bg-[#002d62] text-white px-3 py-2 rounded-t-xl flex items-center justify-between cursor-move select-none shrink-0">
+      <div class="flex items-center space-x-2 text-xs font-bold">
+        <i class="fa-solid fa-calculator text-amber-300"></i>
+        <span>Desmos | College Board Digital SAT Graphing Calculator</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="toggleDesmosExpand()" title="Expand/Collapse" class="text-white/70 hover:text-white text-xs p-1">
+          <i id="desmos-expand-icon" class="fa-solid fa-expand"></i>
+        </button>
+        <button onclick="toggleDesmosCalculator()" title="Close" class="text-white/70 hover:text-white text-xs p-1">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Live Official SAT Desmos Iframe -->
+    <iframe id="desmos-sat-iframe" src="https://www.desmos.com/testing/cb-sat/graphing" class="w-full flex-1 border-0 rounded-b-xl" allow="clipboard-write"></iframe>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- APPLICATION SCRIPT LOGIC                   -->
+  <!-- ========================================== -->
+  <script>
+    // App State
+    let currentTest = null;
+    let currentModuleIndex = 1; // 1 or 2
+    let currentModuleQuestions = [];
+    let currentQuestionIndex = 0; // 0 to 21
+    let userAnswers = {}; // { questionId: "A" or "3.5" }
+    let flaggedQuestions = {}; // { questionId: true }
+    let timerInterval = null;
+    let timeRemaining = 35 * 60; // 35 minutes in seconds
+    let isTimerVisible = true;
+    let isDesmosExpanded = false;
+    let breakTimerInterval = null;
+    let breakTimeRemaining = 10 * 60;
+    let activeFilter = 'all';
+
+    // Initialize on window load
+    window.addEventListener('DOMContentLoaded', () => {
+      initDashboard();
+      const refModal = document.getElementById('modal-reference');
+      if (refModal) applyKaTeX(refModal);
+    });
+
+    // Desmos Calculator Toggle & Expand
+    function toggleDesmosCalculator() {
+      const container = document.getElementById('desmos-floating-container');
+      container.classList.toggle('hidden');
+    }
+
+    function toggleDesmosExpand() {
+      const container = document.getElementById('desmos-floating-container');
+      const icon = document.getElementById('desmos-expand-icon');
+      isDesmosExpanded = !isDesmosExpanded;
+      if (isDesmosExpanded) {
+        container.classList.remove('w-[560px]', 'h-[580px]');
+        container.classList.add('w-[85vw]', 'h-[82vh]');
+        icon.className = 'fa-solid fa-compress';
+      } else {
+        container.classList.remove('w-[85vw]', 'h-[82vh]');
+        container.classList.add('w-[560px]', 'h-[580px]');
+        icon.className = 'fa-solid fa-expand';
+      }
+    }
+
+    // Modal Helpers
+    function toggleModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.toggle('hidden');
+        if (modalId === 'modal-review-grid' && !modal.classList.contains('hidden')) {
+          renderPopupReviewGrid();
+        }
+      }
+    }
+
+    // Dashboard Initialization
+    
+    // ========================================================
+    // CENTRALIZED VIEW SWITCHER (Prevents screen overlapping)
+    // ========================================================
+    function switchView(targetViewId) {
+      const allViews = [
+        'view-dashboard',
+        'view-test',
+        'view-module-review',
+        'view-break',
+        'view-results'
+      ];
+      allViews.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === targetViewId) {
+          el.classList.remove('hidden');
+          if (id === 'view-test' || id === 'view-break' || id === 'view-module-review') {
+            el.style.display = 'flex';
+          } else {
+            el.style.display = 'block';
+          }
+        } else {
+          el.classList.add('hidden');
+          el.style.display = 'none';
+        }
+      });
+      window.scrollTo(0, 0);
+    }
+
+    // In-Page Custom Modal & Toast System (Replaces browser alert/confirm)
+    let customConfirmCallback = null;
+
+    function showCustomConfirm({ title, message, confirmText, confirmClass, iconClass, iconBgClass, onConfirm }) {
+      const elTitle = document.getElementById('confirm-modal-title');
+      const elMsg = document.getElementById('confirm-modal-message');
+      const btn = document.getElementById('btn-confirm-modal-action');
+      const icon = document.getElementById('confirm-modal-icon');
+      const iconBg = document.getElementById('confirm-modal-icon-bg');
+
+      if (elTitle) elTitle.innerText = title || "Tasdiqlash";
+      if (elMsg) elMsg.innerText = message || "Bu amalni bajarishni tasdiqlaysizmi?";
+      if (btn) {
+        btn.innerText = confirmText || "O'chirish";
+        btn.className = confirmClass || "px-5 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center gap-1.5";
+      }
+      if (icon) icon.className = iconClass || 'fa-solid fa-trash-can';
+      if (iconBg) iconBg.className = iconBgClass || 'w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 text-xl shadow-xs';
+
+      customConfirmCallback = onConfirm;
+
+      const modal = document.getElementById('modal-custom-confirm');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCustomConfirm() {
+      const modal = document.getElementById('modal-custom-confirm');
+      if (modal) modal.classList.add('hidden');
+      customConfirmCallback = null;
+    }
+
+    function executeCustomConfirm() {
+      const cb = customConfirmCallback;
+      closeCustomConfirm();
+      if (typeof cb === 'function') {
+        cb();
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      let toast = document.getElementById('app-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'app-toast';
+        toast.className = 'fixed bottom-6 right-6 z-[110] transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none';
+        document.body.appendChild(toast);
+      }
+
+      const isSuccess = (type === 'success');
+      const icon = isSuccess ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-sky-400';
+      const bg = 'bg-slate-900/95 text-white border-slate-700/80 shadow-2xl backdrop-blur-md';
+
+      toast.innerHTML = `
+        <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border ${bg} text-xs font-semibold">
+          <i class="fa-solid ${icon} text-base"></i>
+          <span>${message}</span>
+        </div>
+      `;
+
+      toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2600);
+    }
+
+
+    function initDashboard() {
+      const container = document.getElementById('test-history-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let historyList = [];
+      try {
+        historyList = JSON.parse(localStorage.getItem('sat_test_history_list') || '[]');
+      } catch (e) {
+        historyList = [];
+      }
+
+      // Update stat cards
+      const totalQs = window.OFFICIAL_QUESTION_BANK ? window.OFFICIAL_QUESTION_BANK.length : 1153;
+      const elTotal = document.getElementById('stat-total-qs');
+      if (elTotal) elTotal.innerText = `${totalQs.toLocaleString()} Qs`;
+
+      const completedCount = historyList.length;
+      const elCompleted = document.getElementById('stat-completed');
+      if (elCompleted) elCompleted.innerText = `${completedCount}`;
+
+      if (completedCount > 0) {
+        const totalScores = historyList.reduce((acc, h) => acc + (Number(h.scaledScore) || 200), 0);
+        const avgScore = Math.round(totalScores / completedCount);
+        const maxScore = Math.max(...historyList.map(h => Number(h.scaledScore) || 200));
+
+        const elAvg = document.getElementById('stat-avg-score');
+        if (elAvg) elAvg.innerText = `${avgScore}`;
+        const elMax = document.getElementById('stat-max-score');
+        if (elMax) elMax.innerText = `${maxScore}`;
+      } else {
+        const elAvg = document.getElementById('stat-avg-score');
+        if (elAvg) elAvg.innerText = '---';
+        const elMax = document.getElementById('stat-max-score');
+        if (elMax) elMax.innerText = '---';
+      }
+
+      if (historyList.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border border-dashed border-slate-300 p-8 sm:p-12 text-center text-slate-500 shadow-sm">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 text-sky-600 flex items-center justify-center text-2xl shadow-inner">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <h4 class="font-extrabold text-slate-800 text-lg mb-1.5">Hozircha ishlangan testlar tarixi mavjud emas</h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto mb-6 leading-relaxed">
+              Yuqoridagi <strong>"Start New Adaptive Test"</strong> tugmasini bosib, 44 talik adaptiv testni boshlang. Test yakunlangach, to'plangan ball va o'zbekcha yechimlar tahlili shu yerda avtomatik saqlanib boradi.
+            </p>
+            <button onclick="startDynamicAdaptiveTest()" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-xl text-xs font-extrabold transition shadow-md inline-flex items-center gap-2">
+              <i class="fa-solid fa-play"></i> Yangi Adaptiv Testni Boshlash
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      historyList.forEach((item) => {
+        const score = Number(item.scaledScore) || 200;
+        const scoreColor = score >= 700 
+          ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
+          : score >= 600 
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+            : 'bg-amber-50 border-amber-200 text-amber-700';
+
+        const pathBadge = item.adaptivePath 
+          ? `<span class="text-[11px] ${item.adaptivePath === 'Hard' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800'} px-2.5 py-0.5 rounded-full font-bold">Module 2: ${item.adaptivePath}</span>` 
+          : '';
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition flex flex-col sm:flex-row sm:items-center justify-between gap-4";
+        card.innerHTML = `
+          <div class="flex items-start gap-4">
+            <!-- Score Badge -->
+            <div class="w-16 h-16 rounded-2xl ${scoreColor} border flex flex-col items-center justify-center shrink-0 shadow-xs">
+              <span class="text-[10px] font-bold leading-none uppercase text-slate-400">Score</span>
+              <span class="text-2xl font-extrabold leading-tight mt-0.5">${score}</span>
+            </div>
+
+            <!-- Test Details -->
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <span class="font-extrabold text-slate-800 text-sm">${(item.title || 'Digital SAT Practice Test').replace(/\s*\(Official PDF Question Bank\)/gi, ' (Official Question Bank)').replace(/\bPDF\s*/gi, '')}</span>
+                <span class="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-semibold">
+                  <i class="fa-regular fa-clock mr-1 text-slate-400"></i>${item.date || 'Yaqinda'}
+                </span>
+                ${pathBadge}
+              </div>
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 mt-2">
+                <span><i class="fa-solid fa-check text-emerald-600 mr-1"></i>To'g'ri javoblar: <strong class="text-slate-800">${item.totalCorrect} / 44</strong></span>
+                <span><i class="fa-solid fa-layer-group text-slate-400 mr-1"></i>M1: <strong>${item.m1Correct}/22</strong> &bull; M2: <strong>${item.m2Correct}/22</strong></span>
+                <span><i class="fa-solid fa-xmark text-rose-500 mr-1"></i>Xatolar: <strong class="text-rose-600">${44 - item.totalCorrect}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <button onclick="viewExistingResult('${item.id}')" class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-95 text-[#002d62] font-bold text-xs rounded-xl border border-blue-200 transition flex items-center gap-2 shadow-xs">
+              <i class="fa-solid fa-file-invoice text-sky-600"></i>
+              <span>Tahlil va Yechimlar</span>
+            </button>
+            <button onclick="deleteSingleHistory('${item.id}')" title="Ushbu natijani o'chirish" class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl border border-transparent hover:border-rose-200 transition">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function deleteSingleHistory(testId) {
+      showCustomConfirm({
+        title: "Test natijasini o'chirish",
+        message: "Haqiqatan ham ushbu test natijasini tarixdan o'chirmoqchimisiz? Ushbu qayd va tahlillar qayta tiklanmaydi.",
+        confirmText: "Ha, o'chirilsin",
+        confirmClass: "px-5 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm",
+        iconClass: "fa-solid fa-trash-can",
+        iconBgClass: "w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 text-xl shadow-xs",
+        onConfirm: () => {
+          try {
+            let historyList = JSON.parse(localStorage.getItem('sat_test_history_list') || '[]');
+            historyList = historyList.filter(h => h.id !== testId);
+            localStorage.setItem('sat_test_history_list', JSON.stringify(historyList));
+            localStorage.removeItem(`sat_test_result_${testId}`);
+            localStorage.removeItem(`sat_test_data_${testId}`);
+            showToast("Test natijasi tarixdan o'chirildi");
+          } catch (e) {
+            console.error(e);
+          }
+          initDashboard();
+        }
+      });
+    }
+
+    function resetAllScores() {
+      showCustomConfirm({
+        title: "Barcha testlar tarixini tozalash",
+        message: "Haqiqatan ham barcha ishlangan testlar natijalarini to'liq tozalab tashlamoqchimisiz? Barcha qaydlar va tahlillar o'chiriladi.",
+        confirmText: "Barchasini tozalash",
+        confirmClass: "px-5 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm",
+        iconClass: "fa-solid fa-trash-can",
+        iconBgClass: "w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 text-xl shadow-xs",
+        onConfirm: () => {
+          localStorage.removeItem('sat_test_history_list');
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('sat_test_result_') || k.startsWith('sat_test_data_'))) {
+              keysToRemove.push(k);
+            }
+          }
+          keysToRemove.forEach(k => localStorage.removeItem(k));
+          showToast("Barcha testlar tarixi tozalandi");
+          initDashboard();
+        }
+      });
+    }
+
+    // Generate Dynamic Custom Test from 918 questions in bank
+    function generateCustomRandomTest() {
+      if (!window.OFFICIAL_QUESTION_BANK || window.OFFICIAL_QUESTION_BANK.length === 0) {
+        alert("Official Question Bank is not loaded.");
+        return;
+      }
+      const bank = window.OFFICIAL_QUESTION_BANK;
+      const rng = Math.random;
+
+      function pick(domain, diff, count) {
+        let pool = bank.filter(q => q.domain === domain && q.difficulty === diff);
+        if (pool.length < count) pool = bank.filter(q => q.domain === domain);
+        return pool.sort(() => 0.5 - rng()).slice(0, count);
+      }
+
+      const m1 = [
+        ...pick("Algebra", "Easy", 2), ...pick("Algebra", "Medium", 5), ...pick("Algebra", "Hard", 1),
+        ...pick("Advanced Math", "Easy", 2), ...pick("Advanced Math", "Medium", 5), ...pick("Advanced Math", "Hard", 1),
+        ...pick("Problem-Solving and Data Analysis", "Easy", 1), ...pick("Problem-Solving and Data Analysis", "Medium", 1), ...pick("Problem-Solving and Data Analysis", "Hard", 1),
+        ...pick("Geometry and Trigonometry", "Easy", 1), ...pick("Geometry and Trigonometry", "Medium", 1), ...pick("Geometry and Trigonometry", "Hard", 1)
+      ].slice(0, 22);
+
+      const m2_h = [
+        ...pick("Algebra", "Medium", 3), ...pick("Algebra", "Hard", 5),
+        ...pick("Advanced Math", "Medium", 3), ...pick("Advanced Math", "Hard", 5),
+        ...pick("Problem-Solving and Data Analysis", "Medium", 1), ...pick("Problem-Solving and Data Analysis", "Hard", 2),
+        ...pick("Geometry and Trigonometry", "Medium", 1), ...pick("Geometry and Trigonometry", "Hard", 2)
+      ].slice(0, 22);
+
+      const m2_e = [
+        ...pick("Algebra", "Easy", 5), ...pick("Algebra", "Medium", 3),
+        ...pick("Advanced Math", "Easy", 5), ...pick("Advanced Math", "Medium", 3),
+        ...pick("Problem-Solving and Data Analysis", "Easy", 2), ...pick("Problem-Solving and Data Analysis", "Medium", 1),
+        ...pick("Geometry and Trigonometry", "Easy", 2), ...pick("Geometry and Trigonometry", "Medium", 1)
+      ].slice(0, 22);
+
+      const customTestId = `practice_custom_${Date.now()}`;
+      currentTest = {
+        id: customTestId,
+        title: `Official Random Practice Test`,
+        description: "Freshly sampled from the 918 official College Board Question Bank questions.",
+        module1: m1,
+        module2_hard: m2_h,
+        module2_easy: m2_e
+      };
+
+      currentModuleIndex = 1;
+      currentModuleQuestions = currentTest.module1;
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      flaggedQuestions = {};
+
+      document.getElementById('footer-test-title').innerText = currentTest.title;
+      switchView('view-test');
+
+      startTimer();
+      renderQuestion();
+    }
+
+
+    // ========================================================
+    // CHOICE SHUFFLER & DYNAMIC ON-THE-FLY TEST GENERATOR
+    // ========================================================
+
+    // Permutes MCQ choices so that option positions change randomly on every session
+    function shuffleQuestionChoices(question) {
+      if (!question) return question;
+      // If not MCQ or fewer than 2 choices, return cloned copy
+      if (question.type !== 'mcq' || !question.options || question.options.length <= 1) {
+        return JSON.parse(JSON.stringify(question));
+      }
+
+      const qCopy = JSON.parse(JSON.stringify(question));
+      const origOptions = qCopy.options;
+
+      // Identify the original correct option object
+      const origAns = String(qCopy.correctAnswer).trim();
+      let origCorrectOpt = null;
+      for (const opt of origOptions) {
+        if (opt.label === origAns || opt.id === origAns) {
+          origCorrectOpt = opt;
+          break;
+        }
+      }
+
+      // Fisher-Yates random shuffle of the choices array
+      const shuffled = [...origOptions];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      // Re-label with A, B, C, D and assign new correctAnswer
+      const letters = ['A', 'B', 'C', 'D'];
+      let newCorrectLabel = 'A';
+
+      shuffled.forEach((opt, idx) => {
+        const newLbl = letters[idx] || String.fromCharCode(65 + idx);
+        if (origCorrectOpt && (opt === origCorrectOpt || opt.id === origCorrectOpt.id)) {
+          newCorrectLabel = newLbl;
+        }
+        opt.label = newLbl;
+      });
+
+      qCopy.options = shuffled;
+      qCopy.originalAnswer = origAns;
+      qCopy.correctAnswer = newCorrectLabel;
+
+      return qCopy;
+    }
+
+    // Dynamic On-the-Fly Adaptive SAT Test Generator (Domain-Balanced & Shuffled)
+    function startDynamicAdaptiveTest() {
+      if (!window.OFFICIAL_QUESTION_BANK || window.OFFICIAL_QUESTION_BANK.length === 0) {
+        alert("Official Question Bank is not loaded.");
+        return;
+      }
+      const bank = window.OFFICIAL_QUESTION_BANK;
+      const usedIds = new Set();
+
+      function pickQuestions(domainKey, diff, count) {
+        let pool = bank.filter(q => 
+          !usedIds.has(q.id) && 
+          (q.domain || '').toLowerCase().includes(domainKey.toLowerCase()) && 
+          q.difficulty === diff
+        );
+        if (pool.length < count) {
+          pool = bank.filter(q => 
+            !usedIds.has(q.id) && 
+            (q.domain || '').toLowerCase().includes(domainKey.toLowerCase())
+          );
+        }
+        if (pool.length < count) {
+          pool = bank.filter(q => !usedIds.has(q.id));
+        }
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        const chosen = shuffled.slice(0, count);
+        chosen.forEach(q => usedIds.add(q.id));
+        return chosen.map(q => shuffleQuestionChoices(q));
+      }
+
+      // Official SAT Blueprint per module (22 questions):
+      // Algebra: ~7 Qs | Advanced Math: ~7 Qs | Problem-Solving: ~4 Qs | Geometry & Trig: ~4 Qs
+      
+      // Module 1: Balanced routing module
+      const m1 = [
+        ...pickQuestions('Algebra', 'Easy', 2),
+        ...pickQuestions('Algebra', 'Medium', 3),
+        ...pickQuestions('Algebra', 'Hard', 2),
+        ...pickQuestions('Advanced', 'Easy', 2),
+        ...pickQuestions('Advanced', 'Medium', 3),
+        ...pickQuestions('Advanced', 'Hard', 2),
+        ...pickQuestions('Problem', 'Easy', 1),
+        ...pickQuestions('Problem', 'Medium', 2),
+        ...pickQuestions('Problem', 'Hard', 1),
+        ...pickQuestions('Geometry', 'Easy', 1),
+        ...pickQuestions('Geometry', 'Medium', 2),
+        ...pickQuestions('Geometry', 'Hard', 1)
+      ].slice(0, 22);
+
+      const m1Ids = new Set(m1.map(q => q.id));
+
+      // Module 2 Hard (Upper Adaptive Track - zero overlap with M1)
+      usedIds.clear();
+      m1Ids.forEach(id => usedIds.add(id));
+      const m2_h = [
+        ...pickQuestions('Algebra', 'Medium', 3),
+        ...pickQuestions('Algebra', 'Hard', 4),
+        ...pickQuestions('Advanced', 'Medium', 3),
+        ...pickQuestions('Advanced', 'Hard', 4),
+        ...pickQuestions('Problem', 'Medium', 1),
+        ...pickQuestions('Problem', 'Hard', 3),
+        ...pickQuestions('Geometry', 'Medium', 1),
+        ...pickQuestions('Geometry', 'Hard', 3)
+      ].slice(0, 22);
+
+      // Module 2 Easy (Lower Adaptive Track - zero overlap with M1)
+      usedIds.clear();
+      m1Ids.forEach(id => usedIds.add(id));
+      const m2_e = [
+        ...pickQuestions('Algebra', 'Easy', 5),
+        ...pickQuestions('Algebra', 'Medium', 2),
+        ...pickQuestions('Advanced', 'Easy', 5),
+        ...pickQuestions('Advanced', 'Medium', 2),
+        ...pickQuestions('Problem', 'Easy', 3),
+        ...pickQuestions('Problem', 'Medium', 1),
+        ...pickQuestions('Geometry', 'Easy', 3),
+        ...pickQuestions('Geometry', 'Medium', 1)
+      ].slice(0, 22);
+
+      const dynamicTestId = `practice_auto_${Date.now()}`;
+      currentTest = {
+        id: dynamicTestId,
+        title: `Dynamic SAT Math Test (Official Question Bank)`,
+        description: `Official College Board distribution: 7 Algebra, 7 Advanced Math, 4 Problem-Solving, 4 Geometry. Choices randomized every attempt.`,
+        module1: m1,
+        module2_hard: m2_h,
+        module2_easy: m2_e
+      };
+
+      currentModuleIndex = 1;
+      currentModuleQuestions = currentTest.module1;
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      flaggedQuestions = {};
+
+      document.getElementById('footer-test-title').innerText = currentTest.title;
+      switchView('view-test');
+
+      startTimer();
+      renderQuestion();
+    }
+
+    // Targeted Domain Drill (22 Questions in a single domain with shuffled choices)
+    function startDomainDrill(keyword) {
+      if (!window.OFFICIAL_QUESTION_BANK || window.OFFICIAL_QUESTION_BANK.length === 0) {
+        alert("Official Question Bank is not loaded.");
+        return;
+      }
+      const bank = window.OFFICIAL_QUESTION_BANK;
+      let pool = bank.filter(q => 
+        (q.domain || '').toLowerCase().includes(keyword.toLowerCase()) ||
+        (q.skill || '').toLowerCase().includes(keyword.toLowerCase())
+      );
+      if (pool.length < 15) pool = bank;
+
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, Math.min(22, pool.length)).map(q => shuffleQuestionChoices(q));
+
+      const drillId = `drill_${Date.now()}`;
+      currentTest = {
+        id: drillId,
+        title: `${keyword} Practice Drill (${selected.length} Questions)`,
+        description: `Targeted practice module from the official College Board question bank. Shuffled choices and full solutions.`,
+        module1: selected,
+        module2_hard: selected,
+        module2_easy: selected
+      };
+
+      currentModuleIndex = 1;
+      currentModuleQuestions = currentTest.module1;
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      flaggedQuestions = {};
+
+      document.getElementById('footer-test-title').innerText = currentTest.title;
+      switchView('view-test');
+
+      startTimer();
+      renderQuestion();
+    }
+
+    // Start Test (Shuffles choices for every attempt)
+    function startTest(testId) {
+      const origTest = window.BLUEBOOK_TESTS.find(t => t.id === testId);
+      if (!origTest) return;
+
+      // Deep copy and shuffle choices for all questions in this test attempt
+      currentTest = {
+        id: origTest.id,
+        title: origTest.title,
+        description: origTest.description,
+        module1: origTest.module1.map(q => shuffleQuestionChoices(q)),
+        module2_hard: origTest.module2_hard.map(q => shuffleQuestionChoices(q)),
+        module2_easy: origTest.module2_easy.map(q => shuffleQuestionChoices(q))
+      };
+
+      currentModuleIndex = 1;
+      currentModuleQuestions = currentTest.module1;
+      currentQuestionIndex = 0;
+      userAnswers = {};
+      flaggedQuestions = {};
+
+      document.getElementById('footer-test-title').innerText = currentTest.title;
+      switchView('view-test');
+
+      startTimer();
+      renderQuestion();
+    }
+
+    // Timer Logic
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeRemaining = 35 * 60; // 35 minutes
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert("Time is up for this module (35 minutes)!");
+          submitCurrentModule();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      const str = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const timerEl = document.getElementById('test-timer-display');
+      
+      if (isTimerVisible) {
+        timerEl.innerText = str;
+      } else {
+        timerEl.innerText = 'Hidden';
+      }
+
+      // 5 min warning
+      if (timeRemaining <= 300) {
+        timerEl.classList.add('text-rose-400');
+        if (!isTimerVisible) {
+          isTimerVisible = true; // Auto-unhide at 5 minutes
+          document.getElementById('btn-toggle-timer').innerText = 'Hide';
+        }
+      } else {
+        timerEl.classList.remove('text-rose-400');
+      }
+    }
+
+    function toggleTimerVisibility() {
+      isTimerVisible = !isTimerVisible;
+      document.getElementById('btn-toggle-timer').innerText = isTimerVisible ? 'Hide' : 'Show';
+      updateTimerDisplay();
+    }
+
+    // Render Current Question
+    function renderQuestion() {
+      const q = currentModuleQuestions[currentQuestionIndex];
+      if (!q) return;
+
+      // Update Header & Footers
+      document.getElementById('header-module-label').innerText = `Module ${currentModuleIndex}`;
+      document.getElementById('question-header-num').innerText = `Question ${currentQuestionIndex + 1} of 22`;
+      document.getElementById('footer-question-status').innerText = `Question ${currentQuestionIndex + 1} of 22`;
+
+      // Back / Next button state
+      document.getElementById('btn-nav-back').disabled = (currentQuestionIndex === 0);
+
+      // Flag for review button
+      const isFlagged = !!flaggedQuestions[q.id];
+      const flagBtn = document.getElementById('btn-mark-review');
+      const flagIcon = document.getElementById('flag-icon');
+      if (isFlagged) {
+        flagBtn.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-800');
+        flagIcon.className = 'fa-solid fa-bookmark text-amber-600';
+      } else {
+        flagBtn.classList.remove('bg-amber-100', 'border-amber-400', 'text-amber-800');
+        flagIcon.className = 'fa-regular fa-bookmark';
+      }
+
+      // Prompt Rendering (MathML & HTML or Image)
+      const promptEl = document.getElementById('question-prompt');
+      if (q.stem_image) {
+        promptEl.innerHTML = `<img src="${q.stem_image}" alt="Question ${q.id}" class="w-full max-w-full h-auto rounded shadow-sm border border-slate-200">`;
+      } else {
+        const stemContent = q.stem || q.prompt || '';
+        promptEl.innerHTML = formatMathText(stemContent);
+        applyKaTeX(promptEl);
+      }
+
+      // Options vs Grid-in
+      const containerMcq = document.getElementById('container-mcq');
+      const containerGridin = document.getElementById('container-gridin');
+
+      if (q.type === 'mcq') {
+        containerMcq.classList.remove('hidden');
+        containerGridin.classList.add('hidden');
+        containerMcq.innerHTML = '';
+
+        const selectedAnswer = userAnswers[q.id];
+
+        // If q.options exists, render with options content; if options are in the image, render Choice A, B, C, D buttons
+        const hasOptionsList = q.options && q.options.length > 0;
+        const optsToRender = hasOptionsList ? q.options : [
+          { label: 'A', text: 'Choice A' },
+          { label: 'B', text: 'Choice B' },
+          { label: 'C', text: 'Choice C' },
+          { label: 'D', text: 'Choice D' }
+        ];
+
+        // Official Bluebook vertical option list (One card per row, wide and scrollable)
+        containerMcq.className = 'space-y-2.5 pb-10';
+        const rightSection = document.getElementById('right-panel-section');
+        const rightWrapper = document.getElementById('right-panel-wrapper');
+        if (rightSection) {
+          rightSection.className = 'w-full md:w-[460px] lg:w-[500px] shrink-0 p-4 md:p-6 overflow-y-auto min-h-0 h-full bg-slate-50/50 flex flex-col justify-start';
+        }
+        if (rightWrapper) {
+          rightWrapper.className = 'max-w-lg w-full mx-auto';
+        }
+
+        optsToRender.forEach(opt => {
+          const isSelected = selectedAnswer === opt.label;
+          const optDiv = document.createElement('div');
+          optDiv.className = `option-btn border-2 rounded-xl p-3 flex items-center justify-between cursor-pointer min-h-[50px] ${isSelected ? 'selected' : 'border-gray-200 bg-white'}`;
+          optDiv.onclick = () => selectOption(q.id, opt.label);
+
+          const optionHtml = opt.content || opt.text || '';
+
+          optDiv.innerHTML = `
+            <div class="flex items-center space-x-3.5 flex-1 pr-2 min-w-0">
+              <div class="radio-circle w-7 h-7 rounded-full border-2 border-gray-400 flex items-center justify-center font-bold text-xs shrink-0">
+                ${opt.label}
+              </div>
+              <div class="text-sm sm:text-base text-gray-800 font-medium min-w-0 overflow-x-auto">
+                ${formatMathText(optionHtml)}
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); toggleEliminate(this)" title="Eliminate choice" class="text-gray-400 hover:text-gray-600 p-1 rounded shrink-0 ml-2">
+              <span class="text-xs font-serif font-bold italic line-through">ABC</span>
+            </button>
+          `;
+          containerMcq.appendChild(optDiv);
+        });
+        applyKaTeX(containerMcq);
+      } else {
+        containerMcq.classList.add('hidden');
+        containerGridin.classList.remove('hidden');
+        const gridInput = document.getElementById('gridin-input');
+        gridInput.value = userAnswers[q.id] || '';
+      }
+    }
+
+    // Answer Handling
+    function selectOption(qid, label) {
+      if (userAnswers[qid] === label) {
+        delete userAnswers[qid]; // unselect
+      } else {
+        userAnswers[qid] = label;
+      }
+      renderQuestion();
+    }
+
+    function saveCurrentAnswer(val) {
+      const q = currentModuleQuestions[currentQuestionIndex];
+      if (q) {
+        if (val.trim()) {
+          userAnswers[q.id] = val.trim();
+        } else {
+          delete userAnswers[q.id];
+        }
+      }
+    }
+
+    function toggleEliminate(btn) {
+      const parentOption = btn.closest('.option-btn');
+      parentOption.classList.toggle('eliminated');
+    }
+
+    function toggleMarkReview() {
+      const q = currentModuleQuestions[currentQuestionIndex];
+      if (q) {
+        flaggedQuestions[q.id] = !flaggedQuestions[q.id];
+        renderQuestion();
+      }
+    }
+
+    // Navigation
+    function navigateQuestion(step) {
+      const newIndex = currentQuestionIndex + step;
+      if (newIndex >= 0 && newIndex < currentModuleQuestions.length) {
+        currentQuestionIndex = newIndex;
+        renderQuestion();
+      } else if (newIndex >= currentModuleQuestions.length) {
+        // Reached end of 22 questions -> Go to module review screen
+        goToModuleReviewScreen();
+      }
+    }
+
+    // Popup Review Grid (at bottom of test screen)
+    function renderPopupReviewGrid() {
+      const container = document.getElementById('popup-review-grid-container');
+      container.innerHTML = '';
+      document.getElementById('review-grid-module-info').innerText = `Section 2: Math — Module ${currentModuleIndex}`;
+
+      currentModuleQuestions.forEach((q, idx) => {
+        const isAnswered = !!userAnswers[q.id];
+        const isFlagged = !!flaggedQuestions[q.id];
+        const isCurrent = idx === currentQuestionIndex;
+
+        const btn = document.createElement('button');
+        btn.onclick = () => {
+          currentQuestionIndex = idx;
+          toggleModal('modal-review-grid');
+          renderQuestion();
+        };
+
+        let styleClasses = "relative h-10 rounded-lg flex items-center justify-center font-bold text-xs transition border ";
+        if (isCurrent) {
+          styleClasses += "ring-2 ring-blue-600 ";
+        }
+
+        if (isAnswered) {
+          styleClasses += "bg-gray-900 text-white border-gray-900 ";
+        } else {
+          styleClasses += "border-2 border-dashed border-gray-400 text-gray-700 bg-white hover:bg-gray-50 ";
+        }
+
+        btn.className = styleClasses;
+        btn.innerHTML = `
+          <span>${idx + 1}</span>
+          ${isFlagged ? '<i class="fa-solid fa-bookmark text-amber-400 text-[10px] absolute -top-1 -right-1 drop-shadow-sm"></i>' : ''}
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    // Module Review Screen Logic
+    function goToModuleReviewScreen() {
+      const modal = document.getElementById('modal-review-grid');
+      if (!modal.classList.contains('hidden')) modal.classList.add('hidden');
+
+      switchView('view-module-review');
+      document.getElementById('review-screen-title').innerText = `Review Module ${currentModuleIndex}`;
+
+      const grid = document.getElementById('module-review-items-grid');
+      grid.innerHTML = '';
+
+      currentModuleQuestions.forEach((q, idx) => {
+        const isAnswered = !!userAnswers[q.id];
+        const isFlagged = !!flaggedQuestions[q.id];
+
+        const btn = document.createElement('button');
+        btn.onclick = () => {
+          currentQuestionIndex = idx;
+          returnToTestFromReview();
+        };
+
+        let styleClasses = "relative h-11 rounded-lg flex items-center justify-center font-bold text-xs transition border ";
+        if (isAnswered) {
+          styleClasses += "bg-gray-900 text-white border-gray-900 ";
+        } else {
+          styleClasses += "border-2 border-dashed border-gray-400 text-gray-700 bg-white hover:bg-gray-50 ";
+        }
+
+        btn.className = styleClasses;
+        btn.innerHTML = `
+          <span>${idx + 1}</span>
+          ${isFlagged ? '<i class="fa-solid fa-bookmark text-amber-400 text-[10px] absolute -top-1 -right-1"></i>' : ''}
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function returnToTestFromReview() {
+      switchView('view-test');
+      renderQuestion();
+    }
+
+    // Submit Module & Handle Adaptivity
+    function submitCurrentModule() {
+      if (currentModuleIndex === 1) {
+        // Evaluate Module 1 score to decide Hard or Easy routing
+        let m1Correct = 0;
+        currentTest.module1.forEach(q => {
+          if (isAnswerCorrect(q, userAnswers[q.id])) {
+            m1Correct++;
+          }
+        });
+
+        // Adaptive routing rule: >= 14 correct routes to Hard Module 2
+        if (m1Correct >= 14) {
+          currentModuleQuestions = currentTest.module2_hard;
+          currentTest.adaptivePath = "Hard";
+        } else {
+          currentModuleQuestions = currentTest.module2_easy;
+          currentTest.adaptivePath = "Easy";
+        }
+
+        // Show 10-Minute Break Screen
+        switchView('view-break');
+        startBreakTimer();
+      } else {
+        // Module 2 Finished -> Score test!
+        clearInterval(timerInterval);
+        document.getElementById('view-module-review').classList.add('hidden');
+        scoreAndShowResults();
+      }
+    }
+
+    function startBreakTimer() {
+      clearInterval(breakTimerInterval);
+      breakTimeRemaining = 10 * 60;
+      updateBreakTimerDisplay();
+
+      breakTimerInterval = setInterval(() => {
+        breakTimeRemaining--;
+        updateBreakTimerDisplay();
+        if (breakTimeRemaining <= 0) {
+          clearInterval(breakTimerInterval);
+          startModule2();
+        }
+      }, 1000);
+    }
+
+    function updateBreakTimerDisplay() {
+      const m = Math.floor(breakTimeRemaining / 60);
+      const s = breakTimeRemaining % 60;
+      document.getElementById('break-timer').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startModule2() {
+      clearInterval(breakTimerInterval);
+      currentModuleIndex = 2;
+      currentQuestionIndex = 0;
+
+      switchView('view-test');
+
+      startTimer();
+      renderQuestion();
+    }
+
+    // Scoring & Results Algorithm
+    // Fraction and decimal value evaluator for robust Grid-in scoring
+    function evalFractionOrDecimal(str) {
+      if (!str) return null;
+      str = String(str).trim();
+      if (str.includes('/')) {
+        const parts = str.split('/');
+        if (parts.length === 2) {
+          const num = parseFloat(parts[0]);
+          const den = parseFloat(parts[1]);
+          if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+        }
+      }
+      const val = parseFloat(str);
+      return isNaN(val) ? null : val;
+    }
+
+    function isAnswerCorrect(q, userAns) {
+      if (!userAns) return false;
+      const cleanUser = String(userAns).trim().toLowerCase();
+
+      if (q.type === 'mcq') {
+        const correctStr = String(q.correctAnswer).trim().toLowerCase();
+        return cleanUser === correctStr;
+      } else {
+        // Grid-in (spr / grid): checks exact string match or equivalent float/fraction
+        const acceptable = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+        const userNumeric = evalFractionOrDecimal(cleanUser);
+
+        for (const ans of acceptable) {
+          const cleanAns = String(ans).trim().toLowerCase();
+          if (cleanUser === cleanAns) return true;
+          if (userNumeric !== null) {
+            const ansNumeric = evalFractionOrDecimal(cleanAns);
+            if (ansNumeric !== null && Math.abs(userNumeric - ansNumeric) < 0.001) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+
+    function scoreAndShowResults() {
+      let m1Correct = 0;
+      let m2Correct = 0;
+      const m1Questions = currentTest.module1;
+      const m2Questions = currentModuleQuestions;
+
+      m1Questions.forEach(q => {
+        if (isAnswerCorrect(q, userAnswers[q.id])) m1Correct++;
+      });
+      m2Questions.forEach(q => {
+        if (isAnswerCorrect(q, userAnswers[q.id])) m2Correct++;
+      });
+
+      const totalCorrect = m1Correct + m2Correct;
+      const isHard = (currentTest.adaptivePath === "Hard");
+
+      // Scaled Score Conversion (200 - 800)
+      let scaledScore = 200;
+      if (isHard) {
+        // Hard track: min ~480, max 800
+        const ratio = (totalCorrect - 14) / 30; // 0 to 1
+        scaledScore = Math.round(480 + Math.max(0, ratio) * 320);
+        if (totalCorrect === 44) scaledScore = 800;
+        if (totalCorrect === 43) scaledScore = 790;
+        if (totalCorrect === 42) scaledScore = 780;
+      } else {
+        // Easy track: max ~620
+        const ratio = totalCorrect / 28;
+        scaledScore = Math.round(200 + ratio * 410);
+        if (scaledScore > 620) scaledScore = 620;
+      }
+      scaledScore = Math.max(200, Math.min(800, Math.round(scaledScore / 10) * 10));
+
+      // Ensure adaptivePath and questions exist even if finished early
+      if (!currentTest.adaptivePath) {
+        currentTest.adaptivePath = (m1Correct >= 14) ? "Hard" : "Easy";
+      }
+      if (!currentModuleQuestions || currentModuleQuestions === currentTest.module1) {
+        currentModuleQuestions = (currentTest.adaptivePath === "Hard") ? currentTest.module2_hard : currentTest.module2_easy;
+      }
+
+      const now = new Date();
+      const monthNames = ["Yan", "Fev", "Mar", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"];
+      const dateFormatted = `${now.getDate()}-${monthNames[now.getMonth()]}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      // Save to localStorage with fallback IDs for 100% resilient reconstruction
+      const resultObj = {
+        testId: currentTest.id,
+        title: currentTest.title || "Dynamic SAT Math Test",
+        date: dateFormatted,
+        scaledScore: scaledScore,
+        totalCorrect: totalCorrect,
+        m1Correct: m1Correct,
+        m2Correct: m2Correct,
+        adaptivePath: currentTest.adaptivePath || "Standard",
+        userAnswers: userAnswers,
+        flaggedQuestions: flaggedQuestions,
+        completedAt: now.toISOString(),
+        module1Ids: (currentTest.module1 || []).map(q => q.id),
+        module2HardIds: (currentTest.module2_hard || []).map(q => q.id),
+        module2EasyIds: (currentTest.module2_easy || []).map(q => q.id)
+      };
+
+      try {
+        localStorage.setItem(`sat_test_result_${currentTest.id}`, JSON.stringify(resultObj));
+        localStorage.setItem(`sat_test_data_${currentTest.id}`, JSON.stringify(currentTest));
+      } catch (err) {
+        console.warn("Storage quota when saving test details:", err);
+      }
+
+      // Append to history list
+      let historyList = [];
+      try {
+        historyList = JSON.parse(localStorage.getItem('sat_test_history_list') || '[]');
+      } catch (e) { historyList = []; }
+      historyList = historyList.filter(h => h.id !== currentTest.id);
+      historyList.unshift({
+        id: currentTest.id,
+        title: resultObj.title,
+        date: dateFormatted,
+        scaledScore: resultObj.scaledScore,
+        totalCorrect: resultObj.totalCorrect,
+        m1Correct: resultObj.m1Correct,
+        m2Correct: resultObj.m2Correct,
+        adaptivePath: resultObj.adaptivePath,
+        completedAt: resultObj.completedAt
+      });
+
+      try {
+        localStorage.setItem('sat_test_history_list', JSON.stringify(historyList));
+      } catch (err) {
+        console.error("Failed to save history list:", err);
+      }
+
+      displayResults(resultObj);
+    }
+
+    function viewExistingResult(testId) {
+      const saved = localStorage.getItem(`sat_test_result_${testId}`);
+      if (!saved) {
+        alert("Ushbu test natijasi topilmadi.");
+        return;
+      }
+      const res = JSON.parse(saved);
+
+      currentTest = (window.BLUEBOOK_TESTS && window.BLUEBOOK_TESTS.find(t => t.id === testId)) || null;
+      if (!currentTest) {
+        const savedTestData = localStorage.getItem(`sat_test_data_${testId}`);
+        if (savedTestData) {
+          try { currentTest = JSON.parse(savedTestData); } catch (e) {}
+        }
+      }
+
+      // Resilient reconstruction from question bank if test data was trimmed
+      if (!currentTest && res.module1Ids && window.OFFICIAL_QUESTION_BANK) {
+        const bankMap = new Map(window.OFFICIAL_QUESTION_BANK.map(q => [q.id, q]));
+        currentTest = {
+          id: testId,
+          title: res.title || "Digital SAT Test",
+          module1: res.module1Ids.map(id => bankMap.get(id)).filter(Boolean),
+          module2_hard: (res.module2HardIds || []).map(id => bankMap.get(id)).filter(Boolean),
+          module2_easy: (res.module2EasyIds || []).map(id => bankMap.get(id)).filter(Boolean),
+          adaptivePath: res.adaptivePath || "Hard"
+        };
+      }
+
+      if (!currentTest) {
+        alert("Test ma'lumotlari yuklanmadi.");
+        return;
+      }
+
+      userAnswers = res.userAnswers || {};
+      flaggedQuestions = res.flaggedQuestions || {};
+      currentModuleQuestions = (res.adaptivePath === "Hard") ? currentTest.module2_hard : currentTest.module2_easy;
+      displayResults(res);
+    }
+
+    function displayResults(res) {
+      switchView('view-results');
+
+      document.getElementById('result-test-title').innerText = res.title;
+      document.getElementById('result-scaled-score').innerText = res.scaledScore;
+      document.getElementById('result-correct-count').innerText = `${res.totalCorrect} / 44`;
+      document.getElementById('result-incorrect-count').innerText = `${44 - res.totalCorrect} / 44`;
+      document.getElementById('result-m1-score').innerText = `${res.m1Correct} / 22`;
+      document.getElementById('result-m2-score').innerText = `${res.m2Correct} / 22`;
+      document.getElementById('result-adaptive-path').innerHTML = `
+        Path: <strong class="${res.adaptivePath === 'Hard' ? 'text-indigo-600' : 'text-amber-600'}">${res.adaptivePath} Module 2</strong> 
+        (${res.adaptivePath === 'Hard' ? 'Advanced scoring track up to 800' : 'Standard scoring track capped at ~620'})
+      `;
+
+      renderDomainBreakdown();
+      renderResultsQuestionsList();
+    }
+
+    function renderDomainBreakdown() {
+      const domains = {
+        "Algebra": { correct: 0, total: 0 },
+        "Advanced Math": { correct: 0, total: 0 },
+        "Problem-Solving and Data Analysis": { correct: 0, total: 0 },
+        "Geometry and Trigonometry": { correct: 0, total: 0 }
+      };
+
+      const allTested = [...currentTest.module1, ...currentModuleQuestions];
+      allTested.forEach(q => {
+        if (!domains[q.domain]) domains[q.domain] = { correct: 0, total: 0 };
+        domains[q.domain].total++;
+        if (isAnswerCorrect(q, userAnswers[q.id])) {
+          domains[q.domain].correct++;
+        }
+      });
+
+      const container = document.getElementById('domain-breakdown-bars');
+      container.innerHTML = '';
+
+      for (const [dom, stats] of Object.entries(domains)) {
+        const pct = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+        const barDiv = document.createElement('div');
+        barDiv.innerHTML = `
+          <div class="flex items-center justify-between text-xs font-bold text-gray-700 mb-1">
+            <span>${dom}</span>
+            <span>${stats.correct}/${stats.total} (${pct}%)</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+            <div class="h-2.5 rounded-full ${pct >= 80 ? 'bg-emerald-500' : pct >= 60 ? 'bg-blue-500' : 'bg-amber-500'}" style="width: ${pct}%"></div>
+          </div>
+        `;
+        container.appendChild(barDiv);
+      }
+    }
+
+    
+    let allSolutionsExpanded = false;
+    function toggleAllSolutions() {
+      allSolutionsExpanded = !allSolutionsExpanded;
+      const bodies = document.querySelectorAll('[id^="rationale-body-"]');
+      const chevrons = document.querySelectorAll('[id^="chevron-"]');
+      bodies.forEach(b => {
+        if (allSolutionsExpanded) b.classList.remove('hidden');
+        else b.classList.add('hidden');
+      });
+      chevrons.forEach(c => {
+        if (allSolutionsExpanded) c.classList.add('rotate-180');
+        else c.classList.remove('rotate-180');
+      });
+      const btn = document.getElementById('btn-toggle-all-solutions');
+      if (btn) {
+        btn.innerHTML = allSolutionsExpanded 
+          ? '<i class="fa-solid fa-eye-slash"></i> <span>Yechimlarni yopish</span>' 
+          : '<i class="fa-solid fa-eye"></i> <span>Barcha yechimlarni ochish</span>';
+      }
+    }
+
+    function renderResultsQuestionsList() {
+      const container = document.getElementById('results-questions-list');
+      container.innerHTML = '';
+
+      const allQuestions = [
+        ...currentTest.module1.map((q, idx) => ({ ...q, modNum: 1, qNum: idx + 1 })),
+        ...currentModuleQuestions.map((q, idx) => ({ ...q, modNum: 2, qNum: idx + 1 }))
+      ];
+
+      allQuestions.forEach(q => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = isAnswerCorrect(q, userAns);
+        const isFlagged = !!flaggedQuestions[q.id];
+
+        if (activeFilter === 'incorrect' && isCorrect) return;
+        if (activeFilter === 'flagged' && !isFlagged) return;
+
+        const item = document.createElement('div');
+        item.className = "py-4";
+
+        const correctAnsStr = Array.isArray(q.correctAnswer) ? q.correctAnswer.join(" or ") : q.correctAnswer;
+        const userAnsStr = userAns ? userAns : '<span class="text-gray-400 italic">Unanswered</span>';
+
+        const rawText = (q.stem || q.prompt || '').replace(/<[^>]*>/g, '').trim();
+        const snippetText = rawText ? (rawText.substring(0, 110) + '...') : `${q.skill || q.domain} • Question ${q.id}`;
+
+        item.innerHTML = `
+          <div class="flex items-start justify-between gap-4 cursor-pointer" onclick="toggleRationaleAccordion('${q.id}')">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                ${isCorrect ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}
+              </div>
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-bold text-gray-800">Module ${q.modNum} — Question ${q.qNum}</span>
+                  <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">${q.domain}</span>
+                  <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">${q.difficulty}</span>
+                  ${isFlagged ? '<i class="fa-solid fa-bookmark text-amber-500 text-xs"></i>' : ''}
+                </div>
+                <div class="text-xs text-gray-600 mt-1.5">${snippetText}</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs shrink-0">
+              <div class="text-right">
+                <div class="text-[11px] text-gray-500">Your Answer: <strong class="${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${userAnsStr}</strong></div>
+                <div class="text-[11px] text-gray-700">Correct: <strong class="text-emerald-700">${correctAnsStr}</strong></div>
+              </div>
+              <i id="chevron-${q.id}" class="fa-solid fa-chevron-down text-gray-400 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Accordion Rationale Body (Auto-expanded if incorrect for easy review) -->
+          <div id="rationale-body-${q.id}" class="${isCorrect ? 'hidden' : ''} mt-4 pt-4 border-t border-gray-100 text-xs text-gray-800 bg-slate-50/90 p-5 rounded-2xl space-y-4">
+            
+            <!-- Question Stem -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="font-bold text-gray-700 text-xs uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span><i class="fa-solid fa-circle-question text-blue-600 mr-1.5"></i>Savol matni (Question Prompt):</span>
+                <span class="text-[11px] font-semibold text-slate-500">${q.domain} &bull; ${q.skill}</span>
+              </div>
+              <div class="text-sm leading-relaxed">
+                ${q.stem_image ? `<img src="${q.stem_image}" alt="Question ${q.id}" class="w-full max-w-2xl h-auto rounded border border-slate-100">` : formatMathText(q.stem || q.prompt || '')}
+              </div>
+            </div>
+
+            <!-- Uzbek Explanation & Breakdown -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <div class="font-bold text-emerald-900 text-xs flex items-center space-x-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                  <span>🇺🇿 O'zbekcha Yechim va Tahlil (Qadamma-qadam tushuntirish):</span>
+                </div>
+                <div class="text-[11px] bg-emerald-100/90 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">
+                  To'g'ri javob: ${correctAnsStr}
+                </div>
+              </div>
+              <div class="text-xs text-slate-800 leading-relaxed font-normal whitespace-pre-line bg-white/90 p-3.5 rounded-lg border border-emerald-100 shadow-xs">
+                ${(function() {
+                  let uz = (window.UZBEK_RATIONALES && window.UZBEK_RATIONALES[q.id]) ? window.UZBEK_RATIONALES[q.id] : '';
+                  if (uz) {
+                    if (q.originalAnswer && q.correctAnswer && q.originalAnswer !== q.correctAnswer) {
+                      const orig = q.originalAnswer;
+                      const curr = q.correctAnswer;
+                      uz = uz.split(orig + " tanlovi to'g'ri").join(curr + " tanlovi to'g'ri");
+                      uz = uz.split("Tanlov " + orig + " to'g'ri").join("Tanlov " + curr + " to'g'ri");
+                      uz = uz.split("Variant " + orig + " to'g'ri").join("Variant " + curr + " to'g'ri");
+                    }
+                    return uz;
+                  }
+                  return "To'g'ri javob: <strong>" + correctAnsStr + "</strong>.<br>Ushbu savol <em>" + (q.domain || '') + "</em> bo'limidagi <em>" + (q.skill || '') + "</em> mavzusiga oid. Rasmiy inglizcha yechim quyida to'liq keltirilgan.";
+                })()}
+              </div>
+            </div>
+
+            <!-- Official College Board Solution Crop -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="font-bold text-slate-800 text-xs mb-2 flex items-center space-x-1.5">
+                <i class="fa-solid fa-graduation-cap text-[#002d62]"></i>
+                <span>🇬🇧 Rasmiy College Board Yechimi (Original English Rationale):</span>
+              </div>
+              <div class="text-slate-700 leading-relaxed">
+                ${q.rationale_image ? `<img src="${q.rationale_image}" alt="College Board Solution" class="w-full max-w-3xl h-auto rounded border border-slate-200">` : (function() {
+                  let rText = q.rationale || '';
+                  if (q.originalAnswer && q.correctAnswer && q.originalAnswer !== q.correctAnswer) {
+                    const reg = new RegExp(`Choice ${q.originalAnswer} is correct`, 'g');
+                    rText = rText.replace(reg, `Choice ${q.correctAnswer} is correct`);
+                  }
+                  return formatMathText(rText);
+                })()}
+              </div>
+            </div>
+
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      applyKaTeX(container);
+    }
+
+    function toggleRationaleAccordion(qid) {
+      const body = document.getElementById(`rationale-body-${qid}`);
+      const chevron = document.getElementById(`chevron-${qid}`);
+      if (body) {
+        body.classList.toggle('hidden');
+        if (chevron) {
+          chevron.classList.toggle('rotate-180');
+        }
+      }
+    }
+
+    function filterResults(type) {
+      activeFilter = type;
+      ['all', 'incorrect', 'flagged'].forEach(t => {
+        const btn = document.getElementById(`filter-btn-${t}`);
+        if (t === type) {
+          btn.className = "px-3 py-1.5 rounded-lg font-bold bg-[#002d62] text-white";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg font-bold bg-gray-100 text-gray-700 hover:bg-gray-200";
+        }
+      });
+      renderResultsQuestionsList();
+    }
+
+    function showDashboard() {
+      clearInterval(timerInterval);
+      clearInterval(breakTimerInterval);
+      switchView('view-dashboard');
+      initDashboard();
+    }
+
+    function finishTestEarlyPrompt() {
+      showCustomConfirm({
+        title: "Testni yakunlash",
+        message: "Testni hozirgi holatda yakunlab, natijalarni hisoblash va tarixga saqlashni xohlaysizmi?",
+        confirmText: "Yakunlash va saqlash",
+        confirmClass: "px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm",
+        iconClass: "fa-solid fa-flag-checkered",
+        iconBgClass: "w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 text-xl shadow-xs",
+        onConfirm: () => {
+          clearInterval(timerInterval);
+          clearInterval(breakTimerInterval);
+          scoreAndShowResults();
+        }
+      });
+    }
+
+    function confirmExitTest() {
+      showCustomConfirm({
+        title: "Testdan chiqish",
+        message: "Testdan chiqmoqchimisiz? [Natijani saqlash] tugmasini bossangiz, ishlagan natijangiz saqlanadi va tahlil ochiladi.",
+        confirmText: "Natijani saqlash",
+        confirmClass: "px-5 py-2.5 bg-[#002d62] hover:bg-blue-900 active:scale-95 text-white font-bold text-xs rounded-xl transition shadow-sm",
+        iconClass: "fa-solid fa-arrow-right-from-bracket",
+        iconBgClass: "w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 text-xl shadow-xs",
+        onConfirm: () => {
+          clearInterval(timerInterval);
+          clearInterval(breakTimerInterval);
+          scoreAndShowResults();
+        }
+      });
+    }
+
+    // KaTeX helper
+    function applyKaTeX(element) {
+      if (window.renderMathInElement && element) {
+        renderMathInElement(element, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError: false,
+          ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "iframe", "math"]
+        });
+      }
+    }
+
+    // Fix MathML deprecated mfenced elements (restores missing parentheses)
+    function fixMfenceInHtml(html) {
+      if (!html || !html.includes('<mfenced')) return html;
+      let prev = null;
+      const pattern = /<mfenced(?:\s+[^>]*?open=(['"])(.*?)\1)?(?:\s+[^>]*?close=(['"])(.*?)\3)?[^>]*?>((?:(?!<mfenced)[\s\S])*?)<\/mfenced>/gi;
+      while (prev !== html && html.includes('<mfenced')) {
+        prev = html;
+        html = html.replace(pattern, (match, q1, openD, q2, closeD, inner) => {
+          const o = (openD !== undefined && openD !== null) ? openD : '(';
+          const c = (closeD !== undefined && closeD !== null) ? closeD : ')';
+          return `<mrow><mo>${o}</mo>${inner}<mo>${c}</mo></mrow>`;
+        });
+      }
+      return html;
+    }
+
+    // Content formatting helper
+    function formatMathText(content) {
+      if (!content) return '';
+      let str = String(content);
+
+      // 1. Restore parentheses in MathML
+      str = fixMfenceInHtml(str);
+
+      // 2. Clean up any literal escaped dollars: \$ -> $
+      str = str.replace(/\\+(\$)/g, '&#36;');
+      // Clean up any literal escaped percents: \% -> %
+      str = str.replace(/\\+%/g, '%');
+
+      return str;
+    }
+
+    // Draggable Desmos header
+    (function makeDraggable() {
+      const container = document.getElementById('desmos-floating-container');
+      const header = document.getElementById('desmos-header');
+      let isDragging = false;
+      let startX, startY, initialX, initialY;
+
+      header.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = container.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        container.style.left = `${initialX + dx}px`;
+        container.style.top = `${initialY + dy}px`;
+        container.style.right = 'auto';
+      }
+
+      function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+    })();
+  </script>
+</body>
+</html>

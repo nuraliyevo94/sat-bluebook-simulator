@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: sat-bluebook-simulator
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false

@@ -1,0 +1,39 @@
+========================================================================
+       DIGITAL SAT BLUEBOOK SIMULATOR (MATEMATIKA) - OFFLINE VERSIYA
+       Loyiha muallifi: Otabek_N
+       1,153 ta Rasmiy College Board Savollari & O'zbekcha Yechimlar
+========================================================================
+
+1. ISHGA TUSHIRISH (BOSHLASH):
+   - Papka ichidagi "TESTNI_BOSHLASH.bat" faylini ikki marta bosing.
+   - Yoki to'g'ridan-to'g'ri "bluebook_app.html" (yoki "index.html") faylini 
+     istalgan brauzerda (Chrome, Edge, Opera, Firefox, Safari) oching.
+
+2. INTERNET TALAB QILINMAYDI (100% OFLAYN):
+   - Barcha 1,153 ta savol rasmlari, formulalar, o'zbekcha tahlillar va 
+     uslublar papka ichida to'liq jamlangan.
+   - Internet umuman yo'q joyda ham to'liq tezlikda ishlaydi.
+
+3. ASOSIY IMKONIYATLAR:
+   ✓ Adaptiv Test (44 ta savol):
+     - Module 1 (22 ta savol) natijasiga qarab avtomatik Hard yoki Easy 
+       Module 2 ga o'tkazadi (haqiqiy College Board ball tizimi bo'yicha).
+   ✓ Variantlar har safar aralashadi:
+     - Har safar test boshlanganda A, B, C, D variantlari tasodifiy 
+       o'rin almashadi (yodlab olishning oldini oladi).
+   ✓ O'zbekcha Qadamma-qadam Yechimlar:
+     - Test yakunlangach yoki "Finish" bosilganda, har bir savolga 
+       batafsil o'zbekcha tushuntirish va asl inglizcha yechim ko'rsatiladi.
+   ✓ Natijalar va Xatolar Tarixi:
+     - Ishlangan barcha testlar, to'plangan ballar va xatolar 
+       bosh sahifadagi "Tarix va Tahlil" bo'limida avtomatik saqlanadi.
+   ✓ Rasmiy SAT Desmos Kalkulyatori va Formula varaqasi (Reference).
+
+4. BOSHQA ODAMLARGA ULASHISH:
+   - Ushbu papkani (yoki Digital_SAT_Simulator_Offline.zip arxivini) 
+     fleshka (USB), Google Drive, Yandex Disk yoki Telegram orqali 
+     istalgan kishiga yuborishingiz mumkin.
+   - Ular faqat arxivni ochib, "TESTNI_BOSHLASH.bat" ni bossa bas!
+
+Omad tilaymiz!
+========================================================================
