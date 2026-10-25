@@ -20,7 +20,6 @@ College Board rasmiy Question Bank bazasi asosida yaratilgan **Digital SAT Blueb
 ---
 
 ## 🌐 Jonli sayt (Live Demo)
-- **Render:** [sat-bluebook-simulator.onrender.com](https://sat-bluebook-simulator.onrender.com)
 - **GitHub Pages:** [nuraliyevo94.github.io/sat-bluebook-simulator](https://nuraliyevo94.github.io/sat-bluebook-simulator/)
 
 ---
