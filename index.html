@@ -140,28 +140,87 @@
     }
 
     #view-test:not(.hidden) {
+      height: 100vh !important;
       max-height: 100vh !important;
       min-height: 0 !important;
       display: flex !important;
       flex-direction: column !important;
       overflow: hidden !important;
     }
-    #view-test main {
-      flex: 1 1 0% !important;
-      min-height: 0 !important;
-      height: 100% !important;
-      overflow: hidden !important;
+
+    /* DESKTOP (Split Screen - Authentic College Board Bluebook Layout) */
+    @media (min-width: 768px) {
+      #view-test main {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow: hidden !important;
+      }
+      #view-test section {
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+      #right-panel-section {
+        overflow-y: auto !important;
+        scrollbar-gutter: stable;
+      }
     }
-    #view-test section {
-      min-height: 0 !important;
-      height: 100% !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-    #right-panel-section {
-      overflow-y: auto !important;
-      scrollbar-gutter: stable;
+
+    /* MOBILE PHONES & TABLETS (Seamless Unified Vertical Scroll) */
+    @media (max-width: 767px) {
+      #view-test main {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 2.5rem;
+      }
+      #view-test section {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex: none !important;
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        border-right: none !important;
+      }
+      #right-panel-section {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex: none !important;
+        width: 100% !important;
+        background-color: transparent !important;
+        padding: 0 1rem 2rem 1rem !important;
+      }
+      #right-panel-wrapper {
+        max-width: 100% !important;
+      }
+      #desmos-floating-container {
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border-radius: 0 !important;
+        z-index: 9999 !important;
+      }
     }
 
     /* Option image/graph constraints (compact, inline, crisp) */
@@ -352,61 +411,62 @@
   <!-- ========================================== -->
   <div id="view-test" class="flex-1 flex flex-col hidden bg-white h-full min-h-0 overflow-hidden">
     <!-- BLUEBOOK TOP HEADER -->
-    <header class="bg-[#002d62] text-white h-14 px-4 flex items-center justify-between border-b border-white/10 shrink-0">
+    <header class="bg-[#002d62] text-white h-12 sm:h-14 px-2.5 sm:px-4 flex items-center justify-between border-b border-white/10 shrink-0">
       <!-- Left: Subject & Module info -->
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-1.5 sm:space-x-3">
         <div class="flex flex-col">
-          <span class="text-xs font-bold text-sky-200 uppercase tracking-wider">Section 2: Math</span>
-          <span id="header-module-label" class="text-sm font-semibold text-white">Module 1</span>
+          <span class="hidden sm:inline text-[11px] font-bold text-sky-200 uppercase tracking-wider">Section 2: Math</span>
+          <span id="header-module-label" class="text-xs sm:text-sm font-semibold text-white whitespace-nowrap">Module 1</span>
         </div>
-        <div class="h-6 w-px bg-white/20 mx-1"></div>
+        <div class="h-5 sm:h-6 w-px bg-white/20 mx-0.5 sm:mx-1"></div>
         <!-- Directions Button -->
-        <button onclick="toggleModal('modal-directions')" class="text-xs text-sky-200 hover:text-white flex items-center space-x-1 py-1 px-2 rounded hover:bg-white/10 transition">
-          <span>Directions</span>
-          <i class="fa-solid fa-chevron-down text-[10px]"></i>
+        <button onclick="toggleModal('modal-directions')" class="text-xs text-sky-200 hover:text-white flex items-center space-x-1 py-1 px-1.5 sm:px-2 rounded hover:bg-white/10 transition">
+          <span class="hidden md:inline">Directions</span>
+          <span class="md:hidden">Dir</span>
+          <i class="fa-solid fa-chevron-down text-[9px] sm:text-[10px]"></i>
         </button>
       </div>
 
       <!-- Center: Timer -->
-      <div class="flex items-center space-x-2 bg-black/20 px-3 py-1 rounded-full border border-white/10">
+      <div class="flex items-center space-x-1 sm:space-x-2 bg-black/20 px-2 sm:px-3 py-1 rounded-full border border-white/10">
         <i class="fa-regular fa-clock text-sky-300 text-xs"></i>
-        <span id="test-timer-display" class="font-mono text-sm font-bold tracking-wider">35:00</span>
-        <button id="btn-toggle-timer" onclick="toggleTimerVisibility()" class="text-[11px] text-sky-200 hover:text-white font-medium ml-1 underline cursor-pointer">
+        <span id="test-timer-display" class="font-mono text-xs sm:text-sm font-bold tracking-wider">35:00</span>
+        <button id="btn-toggle-timer" onclick="toggleTimerVisibility()" class="text-[10px] sm:text-[11px] text-sky-200 hover:text-white font-medium ml-0.5 sm:ml-1 underline cursor-pointer">
           Hide
         </button>
       </div>
 
       <!-- Right: Calculator & Reference Tools -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-1 sm:space-x-2">
         <!-- Desmos Calculator Button -->
-        <button onclick="toggleDesmosCalculator()" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-1.5 rounded flex items-center space-x-1.5 border border-white/15 transition shadow-sm">
-          <i class="fa-solid fa-calculator text-amber-300"></i>
-          <span>Calculator</span>
+        <button onclick="toggleDesmosCalculator()" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded flex items-center space-x-1 sm:space-x-1.5 border border-white/15 transition shadow-sm">
+          <i class="fa-solid fa-calculator text-amber-300 text-xs"></i>
+          <span class="hidden sm:inline">Calc</span>
         </button>
 
         <!-- Reference Sheet Button -->
-        <button onclick="toggleModal('modal-reference')" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-1.5 rounded flex items-center space-x-1.5 border border-white/15 transition shadow-sm">
-          <i class="fa-solid fa-book-open text-sky-300"></i>
-          <span>Reference</span>
+        <button onclick="toggleModal('modal-reference')" class="text-xs bg-white/10 hover:bg-white/20 text-white font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded flex items-center space-x-1 sm:space-x-1.5 border border-white/15 transition shadow-sm">
+          <i class="fa-solid fa-book-open text-sky-300 text-xs"></i>
+          <span class="hidden sm:inline">Ref</span>
         </button>
 
         <!-- Finish Test Early Button -->
-        <button onclick="finishTestEarlyPrompt()" title="Testni yakunlash va natijani hisoblash" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded flex items-center space-x-1.5 transition shadow-sm ml-1">
-          <i class="fa-solid fa-flag-checkered text-amber-300"></i>
-          <span>Finish</span>
+        <button onclick="finishTestEarlyPrompt()" title="Testni yakunlash va natijani hisoblash" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded flex items-center space-x-1 transition shadow-sm ml-0.5 sm:ml-1">
+          <i class="fa-solid fa-flag-checkered text-amber-300 text-xs"></i>
+          <span class="hidden sm:inline">Finish</span>
         </button>
 
         <!-- Exit to Dashboard -->
-        <button onclick="confirmExitTest()" title="Return to Dashboard" class="text-xs text-white/70 hover:text-rose-300 p-1.5 rounded hover:bg-white/10 ml-2 transition">
+        <button onclick="confirmExitTest()" title="Return to Dashboard" class="text-xs text-white/70 hover:text-rose-300 p-1 sm:p-1.5 rounded hover:bg-white/10 ml-0.5 sm:ml-2 transition">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </header>
 
-    <!-- BLUEBOOK QUESTION CANVAS (Split layout) -->
-    <main class="flex-1 flex flex-col md:flex-row min-h-0 h-full overflow-hidden">
+    <!-- BLUEBOOK QUESTION CANVAS (Split layout on desktop, unified scroll on mobile) -->
+    <main class="flex-1 flex flex-col md:flex-row min-h-0 h-full overflow-y-auto md:overflow-hidden">
       <!-- Left Panel: Question Prompt & Equations -->
-      <section class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto min-h-0 h-full border-b md:border-b-0 md:border-r border-gray-200">
+      <section class="w-full md:flex-1 p-3.5 sm:p-5 md:p-6 lg:p-8 md:overflow-y-auto min-h-0 md:h-full border-b md:border-b-0 md:border-r border-gray-200">
         <div class="max-w-3xl w-full mx-auto">
           <!-- Question Number & Mark for Review -->
           <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-200">
@@ -427,7 +487,7 @@
       </section>
 
       <!-- Right Panel: Answer Options or Grid-in -->
-      <section id="right-panel-section" class="w-full md:w-[460px] lg:w-[500px] shrink-0 p-4 md:p-6 overflow-y-auto min-h-0 h-full bg-slate-50/50 flex flex-col justify-start">
+      <section id="right-panel-section" class="w-full md:w-[460px] lg:w-[500px] md:shrink-0 p-3 sm:p-4 md:p-6 md:overflow-y-auto min-h-0 md:h-full bg-slate-50/50 flex flex-col justify-start">
         <div id="right-panel-wrapper" class="max-w-lg w-full mx-auto">
           <!-- Multiple Choice Container -->
           <div id="container-mcq" class="space-y-2.5 pb-10">
@@ -455,15 +515,15 @@
     </main>
 
     <!-- BLUEBOOK BOTTOM NAVIGATION BAR -->
-    <footer class="bg-white border-t border-gray-200 h-16 px-6 flex items-center justify-between shrink-0 shadow-sm">
+    <footer class="bg-white border-t border-gray-200 h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between shrink-0 shadow-sm">
       <!-- Left: Test info -->
-      <div class="text-xs font-semibold text-gray-500">
+      <div class="hidden sm:block text-xs font-semibold text-gray-500">
         <span id="footer-test-title">Digital SAT Practice</span>
       </div>
 
       <!-- Center: Review Grid Modal Trigger -->
       <div class="flex items-center">
-        <button onclick="toggleModal('modal-review-grid')" class="text-xs font-bold text-gray-800 hover:text-blue-700 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg border border-gray-300 flex items-center space-x-2 transition shadow-sm">
+        <button onclick="toggleModal('modal-review-grid')" class="text-xs font-bold text-gray-800 hover:text-blue-700 bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-2 rounded-lg border border-gray-300 flex items-center space-x-1.5 sm:space-x-2 transition shadow-sm">
           <i class="fa-solid fa-table-cells text-gray-600"></i>
           <span id="footer-question-status">Question 1 of 22</span>
           <i class="fa-solid fa-chevron-up text-[10px] ml-1"></i>
@@ -471,11 +531,11 @@
       </div>
 
       <!-- Right: Back and Next buttons -->
-      <div class="flex items-center space-x-3">
-        <button id="btn-nav-back" onclick="navigateQuestion(-1)" class="px-5 py-2 text-xs font-bold rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <button id="btn-nav-back" onclick="navigateQuestion(-1)" class="px-3.5 sm:px-5 py-2 text-xs font-bold rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
           Back
         </button>
-        <button id="btn-nav-next" onclick="navigateQuestion(1)" class="px-6 py-2 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow">
+        <button id="btn-nav-next" onclick="navigateQuestion(1)" class="px-4.5 sm:px-6 py-2 text-xs font-bold rounded-lg bg-[#002d62] hover:bg-blue-900 text-white transition shadow">
           Next
         </button>
       </div>
@@ -1492,6 +1552,14 @@
       const q = currentModuleQuestions[currentQuestionIndex];
       if (!q) return;
 
+      // Reset scroll position to top on question change
+      const testMain = document.querySelector('#view-test main');
+      if (testMain) testMain.scrollTop = 0;
+      const testSection = document.querySelector('#view-test section');
+      if (testSection) testSection.scrollTop = 0;
+      const rightPanel = document.getElementById('right-panel-section');
+      if (rightPanel) rightPanel.scrollTop = 0;
+
       // Update Header & Footers
       document.getElementById('header-module-label').innerText = `Module ${currentModuleIndex}`;
       document.getElementById('question-header-num').innerText = `Question ${currentQuestionIndex + 1} of 22`;
@@ -1547,7 +1615,7 @@
         const rightSection = document.getElementById('right-panel-section');
         const rightWrapper = document.getElementById('right-panel-wrapper');
         if (rightSection) {
-          rightSection.className = 'w-full md:w-[460px] lg:w-[500px] shrink-0 p-4 md:p-6 overflow-y-auto min-h-0 h-full bg-slate-50/50 flex flex-col justify-start';
+          rightSection.className = 'w-full md:w-[460px] lg:w-[500px] md:shrink-0 p-3 sm:p-4 md:p-6 md:overflow-y-auto min-h-0 md:h-full bg-slate-50/50 flex flex-col justify-start';
         }
         if (rightWrapper) {
           rightWrapper.className = 'max-w-lg w-full mx-auto';
