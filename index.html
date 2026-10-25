@@ -1030,6 +1030,7 @@
     let breakTimerInterval = null;
     let breakTimeRemaining = 10 * 60;
     let activeFilter = 'all';
+    let isTestFinished = false;
 
     // Initialize on window load
     window.addEventListener('DOMContentLoaded', () => {
@@ -1174,20 +1175,20 @@
 
     // ================= ACTIVE SESSION PERSISTENCE & AUTO-SAVE =================
     function autoSaveActiveSession() {
-      if (!currentTest || isTestFinished) return;
       try {
+        if (!currentTest || isTestFinished) return;
         const sessionData = {
           test: currentTest,
           moduleIndex: currentModuleIndex,
           questionIndex: currentQuestionIndex,
-          answers: userAnswers,
-          flagged: flaggedQuestions,
-          timerSeconds: timerSeconds,
+          answers: userAnswers || {},
+          flagged: flaggedQuestions || {},
+          timeRemaining: (typeof timeRemaining !== 'undefined' ? timeRemaining : 2100),
           updatedAt: new Date().toISOString()
         };
         localStorage.setItem('sat_active_session', JSON.stringify(sessionData));
       } catch (err) {
-        console.warn('Failed to auto-save active session:', err);
+        console.warn('Auto-save error:', err);
       }
     }
 
@@ -1261,7 +1262,7 @@
         currentQuestionIndex = session.questionIndex || 0;
         userAnswers = session.answers || {};
         flaggedQuestions = session.flagged || {};
-        timerSeconds = session.timerSeconds || 2100;
+        timeRemaining = session.timeRemaining || 2100;
         isTestFinished = false;
 
         document.getElementById('footer-test-title').innerText = currentTest.title;
@@ -1519,6 +1520,7 @@
       currentModuleIndex = 1;
       currentModuleQuestions = currentTest.module1;
       currentQuestionIndex = 0;
+      isTestFinished = false;
       userAnswers = {};
       flaggedQuestions = {};
 
@@ -1923,7 +1925,7 @@
       } else {
         userAnswers[qid] = label;
       }
-      autoSaveActiveSession();
+      try { autoSaveActiveSession(); } catch(e) {}
       renderQuestion();
     }
 
@@ -1957,7 +1959,7 @@
       const newIndex = currentQuestionIndex + step;
       if (newIndex >= 0 && newIndex < currentModuleQuestions.length) {
         currentQuestionIndex = newIndex;
-        autoSaveActiveSession();
+        try { autoSaveActiveSession(); } catch(e) {}
         renderQuestion();
       } else if (newIndex >= currentModuleQuestions.length) {
         // Reached end of 22 questions -> Go to module review screen
